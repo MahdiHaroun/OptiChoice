@@ -1,0 +1,242 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Dashboard - OptiChoice{% endblock %}
+
+{% block content %}
+<div style="text-align: center; color: white; margin-bottom: 50px;">    <h1 style="font-size: 2.5rem; margin-bottom: 20px; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">
+        Welcome back, {% if user.first_name %}{{ user.first_name }}{% else %}{{ user.username }}{% endif %}!
+    </h1>
+    <p style="font-size: 1.1rem; text-shadow: 1px 1px 2px rgba(0,0,0,0.3);">
+        Ready to discover your next favorite content?
+    </p>
+</div>
+
+<div class="dashboard-container">
+    <!-- Top row with 3 cards -->
+    <div class="dashboard-top-row">        <div class="card card-movies">
+            <h3>🎬 Movies</h3>
+            <p>Discover new movies based on your preferences using our advanced AI recommendation models.</p>
+            <a href="{% url 'movie_recommendation_page' %}" class="btn btn-secondary">Start Exploring</a>
+        </div>
+        
+        <div class="card card-books">
+            <h3>📚 Books</h3>
+            <p>Find your next great read with personalized book recommendations tailored to your interests.</p>
+            <a href="#" class="btn btn-secondary">Browse Books</a>
+        </div>
+        
+        <div class="card card-courses">
+            <h3>🎓 Courses</h3>
+            <p>Enhance your skills with curated course recommendations based on your learning goals.</p>
+            <a href="#" class="btn btn-secondary">Find Courses</a>
+        </div>
+    </div>
+    
+    <!-- Bottom row with 1 centered card -->
+    <div class="dashboard-bottom-row">
+        <div class="card card-music">
+            <h3>🎵 Music</h3>
+            <p>Discover new artists and songs that match your musical taste and mood preferences.</p>
+            <a href="#" class="btn btn-secondary">Explore Music</a>
+        </div>
+    </div>
+</div>
+
+<style>
+.dashboard-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.dashboard-top-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 30px;
+    margin-bottom: 40px;
+}
+
+.dashboard-bottom-row {
+    display: flex;
+    justify-content: center;
+}
+
+.card {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 15px;
+    padding: 30px;
+    text-align: center;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+    backdrop-filter: blur(10px);
+    max-width: 350px;
+    min-height: 280px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+/* Dark theme cards */
+[data-theme="dark"] .card {
+    background: rgba(30, 30, 30, 0.95);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+}
+
+.card h3 {
+    font-size: 1.5rem;
+    margin-bottom: 15px;
+    color: #333;
+    font-weight: 600;
+}
+
+/* Dark theme card headings */
+[data-theme="dark"] .card h3 {
+    color: #ffffff;
+}
+
+.card p {
+    color: #666;
+    line-height: 1.6;
+    margin-bottom: 20px;
+    flex-grow: 1;
+}
+
+/* Dark theme card paragraphs */
+[data-theme="dark"] .card p {
+    color: #bbbbbb;
+}
+
+.card .btn {
+    margin-top: auto;
+    padding: 12px 24px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-primary {
+    background: linear-gradient(45deg, #6a11cb, #2575fc);
+    color: white;
+}
+
+.btn-secondary {
+    background: #f8f9fa;
+    color: #333;
+    border: 2px solid #dee2e6;
+}
+
+/* Dark theme secondary buttons */
+[data-theme="dark"] .btn-secondary {
+    background: #495057;
+    color: #ffffff;
+    border: 2px solid #6c757d;
+}
+
+/* Hover effects for each card */
+.card-movies:hover {
+    transform: translateY(-10px);
+    border-color: #ff6b6b;
+    box-shadow: 0 15px 35px rgba(255, 107, 107, 0.3);
+    background: rgba(255, 107, 107, 0.05);
+}
+
+/* Dark theme hover for movies */
+[data-theme="dark"] .card-movies:hover {
+    background: rgba(255, 107, 107, 0.15);
+    box-shadow: 0 15px 35px rgba(255, 107, 107, 0.4);
+}
+
+.card-books:hover {
+    transform: translateY(-10px);
+    border-color: #ff8c42;
+    box-shadow: 0 15px 35px rgba(255, 140, 66, 0.3);
+    background: rgba(255, 140, 66, 0.05);
+}
+
+/* Dark theme hover for books */
+[data-theme="dark"] .card-books:hover {
+    background: rgba(255, 140, 66, 0.15);
+    box-shadow: 0 15px 35px rgba(255, 140, 66, 0.4);
+}
+
+.card-courses:hover {
+    transform: translateY(-10px);
+    border-color: #4dabf7;
+    box-shadow: 0 15px 35px rgba(77, 171, 247, 0.3);
+    background: rgba(77, 171, 247, 0.05);
+}
+
+/* Dark theme hover for courses */
+[data-theme="dark"] .card-courses:hover {
+    background: rgba(77, 171, 247, 0.15);
+    box-shadow: 0 15px 35px rgba(77, 171, 247, 0.4);
+}
+
+.card-music:hover {
+    transform: translateY(-10px);
+    border-color: #51cf66;
+    box-shadow: 0 15px 35px rgba(81, 207, 102, 0.3);
+    background: rgba(81, 207, 102, 0.05);
+}
+
+/* Dark theme hover for music */
+[data-theme="dark"] .card-music:hover {
+    background: rgba(81, 207, 102, 0.15);
+    box-shadow: 0 15px 35px rgba(81, 207, 102, 0.4);
+}
+
+/* Button hover effects */
+.card-movies:hover .btn {
+    background: linear-gradient(45deg, #ff6b6b, #ee5a52);
+}
+
+.card-books:hover .btn {
+    background: linear-gradient(45deg, #ff8c42, #fd7e14);
+    color: white;
+}
+
+.card-courses:hover .btn {
+    background: linear-gradient(45deg, #4dabf7, #339af0);
+    color: white;
+}
+
+.card-music:hover .btn {
+    background: linear-gradient(45deg, #51cf66, #40c057);
+    color: white;
+}
+
+/* Responsive design */
+@media (max-width: 992px) {
+    .dashboard-top-row {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+    }
+    
+    .dashboard-bottom-row {
+        margin-top: 20px;
+    }
+}
+
+@media (max-width: 768px) {
+    .dashboard-top-row {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+    
+    .card {
+        max-width: 100%;
+        padding: 20px;
+        min-height: 220px;
+    }
+    
+    .dashboard-container {
+        padding: 0 15px;
+    }
+}
+</style>
+
+{% endblock %}

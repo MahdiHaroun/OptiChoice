@@ -1,0 +1,43 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Welcome to OptiChoice{% endblock %}
+
+{% block content %}
+<div style="text-align: center; color: white; margin-top: 50px;">    <!-- Logo -->
+    <div style="margin-bottom: 30px;">
+        <img src="{% static 'side_image.png' %}" alt="OptiChoice Logo" style="max-width: 200px; height: 200px; margin-bottom: 10px;">
+    </div>
+    
+    <h1 style="font-size: 3.5rem; margin-bottom: 20px; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">
+        Welcome to OptiChoice
+    </h1>
+    <p style="font-size: 1.2rem; margin-bottom: 40px; text-shadow: 1px 1px 2px rgba(0,0,0,0.3);">
+        Discover your next obsession with AI-powered recommendation system
+    </p>    <div style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap;">
+        <a href="{% url 'login' %}" class="btn btn-primary" style="font-size: 1.1rem; padding: 15px 30px;">
+            Get Started - Login
+        </a>
+        <a href="{% url 'register' %}" class="btn btn-secondary" style="font-size: 1.1rem; padding: 15px 30px;">
+            Create Account
+        </a>
+    </div>
+</div>
+
+<div class="dashboard-cards" style="margin-top: 100px;">
+    <div class="card">
+        <h3> Many Fields for Recommendations</h3>
+        <p>Get personalized recommendations for watching , listening , reading or even studying </p>
+    </div>
+    
+    <div class="card">
+        <h3> Multiple Models</h3>
+        <p>Choose from Multiple AI models for diverse suggestions</p>
+    </div>
+    
+    <div class="card">
+        <h3>All Recommendations , One Place</h3>
+        <p>Intuitive interface with search ,filtering and history tracking for the best user experience </p>
+    </div>
+</div>
+{% endblock %}
