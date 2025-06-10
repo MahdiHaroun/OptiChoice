@@ -79,11 +79,14 @@ class MovieRecommendation_1(APIView):
     def post(self, request):
         serializer = MovieRecommendationRequestSerializer(data=request.data)
         if serializer.is_valid():
-            movie_titles = serializer.validated_data['movie_titles']
+            movie_title = serializer.validated_data['movie_title']
             num_recommendations = serializer.validated_data['num_recommendations']
             model_used = serializer.validated_data['model_used']
             save_history = serializer.validated_data.get('save_history', False)  # default True
             regenerate = serializer.validated_data.get('regenerate', False)    # default False
+
+            # Convert single movie title to list for compatibility with existing AI models
+            movie_titles = [movie_title]
 
             if model_used == 'tfidf':
                 results = recommend_movies_sparse_list(movie_titles, num_recommendations)
@@ -95,14 +98,8 @@ class MovieRecommendation_1(APIView):
                 results = recommend_movies_by_knn_genre(movie_titles, num_recommendations)
             elif model_used == 'Embeddings':
                 results = recommend_movies_embeddings(movie_titles, num_recommendations)
-
             elif model_used == 'NN':
                 results = recommend_movies_nn(movie_titles, num_recommendations)
-                
-
-              
-                
-
             else:
                 return Response(
                     {"error": f"Model '{model_used}' is not supported."},
@@ -122,7 +119,8 @@ class MovieRecommendation_1(APIView):
             return Response({
                 "recommendations": results,
                 "saved_history": save_history,
-                "regenerated": regenerate
+                "regenerated": regenerate,
+                "input_movie": movie_title  # Include the single input movie for frontend
             }, status=status.HTTP_200_OK)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

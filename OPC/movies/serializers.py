@@ -11,10 +11,8 @@ class MovieRecommendationRequestSerializer(serializers.Serializer):
         ('Embeddings', 'Embeddings'),
         ('NN', 'NN'),
     ]
-    movie_titles = serializers.ListField(
-        child=serializers.CharField(),
-        allow_empty=False,
-        help_text="List of input movie titles"
+    movie_title = serializers.CharField(
+        help_text="Single input movie title"
     )
     num_recommendations = serializers.IntegerField(
         min_value=1,

@@ -4,17 +4,17 @@
 {% block title %}Welcome to OptiChoice{% endblock %}
 
 {% block content %}
-<div style="text-align: center; color: white; margin-top: 50px;">    <!-- Logo -->
+<div style="text-align: center; color: var(--text-primary); margin-top: 50px;">    <!-- Logo -->
     <div style="margin-bottom: 30px;">
-        <img src="{% static 'side_image.png' %}" alt="OptiChoice Logo" style="max-width: 200px; height: 200px; margin-bottom: 10px;">
+        <img src="{% static 'images/logo.png' %}" alt="OptiChoice Logo" style="max-width: 200px; height: 200px; margin-bottom: 10px;">
     </div>
     
-    <h1 style="font-size: 3.5rem; margin-bottom: 20px; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">
+    <h1 style="font-size: 3.5rem; margin-bottom: 20px; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); color: var(--text-primary);">
         Welcome to OptiChoice
     </h1>
-    <p style="font-size: 1.2rem; margin-bottom: 40px; text-shadow: 1px 1px 2px rgba(0,0,0,0.3);">
+    <p style="font-size: 1.2rem; margin-bottom: 40px; text-shadow: 1px 1px 2px rgba(0,0,0,0.3); color: var(--text-primary);">
         Discover your next obsession with AI-powered recommendation system
-    </p>    <div style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap;">
+    </p><div style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap;">
         <a href="{% url 'login' %}" class="btn btn-primary" style="font-size: 1.1rem; padding: 15px 30px;">
             Get Started - Login
         </a>

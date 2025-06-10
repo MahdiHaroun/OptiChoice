@@ -13,21 +13,44 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 from pathlib import Path
 from datetime import timedelta
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Load environment variables from .env file
+def load_env():
+    env_file = BASE_DIR / '.env'
+    if env_file.exists():
+        with open(env_file, 'r') as f:
+            for line in f:
+                if line.strip() and not line.startswith('#'):
+                    key, value = line.strip().split('=', 1)
+                    os.environ.setdefault(key, value)
+
+load_env()
+
+def get_env(key, default=None, cast=str):
+    """Get environment variable with optional type casting"""
+    value = os.environ.get(key, default)
+    if cast == bool:
+        return value.lower() in ('true', 'yes', '1', 'on') if isinstance(value, str) else bool(value)
+    elif cast == int:
+        return int(value) if value else default
+    elif cast == list:
+        return [item.strip() for item in value.split(',')] if value else []
+    return value
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-nrwvf&1*5e0h$^%zy9&1uajyym2%wh*=!%i14u%%v!2ed4v1_)'
+SECRET_KEY = get_env('SECRET_KEY', 'django-insecure-fallback-key-change-in-production')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = get_env('DEBUG', True, cast=bool)
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = get_env('ALLOWED_HOSTS', 'localhost,127.0.0.1', cast=list)
 
 
 # Application definition
@@ -40,17 +63,19 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-
-    'authentication',
-    'movies',
+    # Third party apps
+    'corsheaders',
     'rest_framework',
     'rest_framework.authtoken',
     'rest_framework_simplejwt',
 
-
+    # Local apps
+    'authentication',
+    'movies',
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -85,8 +110,12 @@ WSGI_APPLICATION = 'OPC.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': get_env('DB_ENGINE', 'django.db.backends.sqlite3'),
+        'NAME': get_env('DB_NAME', BASE_DIR / 'db.sqlite3'),
+        'USER': get_env('DB_USER', ''),
+        'PASSWORD': get_env('DB_PASSWORD', ''),
+        'HOST': get_env('DB_HOST', ''),
+        'PORT': get_env('DB_PORT', ''),
     }
 }
 
@@ -173,11 +202,11 @@ REST_FRAMEWORK = {
 
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=get_env('JWT_ACCESS_TOKEN_LIFETIME_MINUTES', 60, cast=int)),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=get_env('JWT_REFRESH_TOKEN_LIFETIME_DAYS', 1, cast=int)),
     'ROTATE_REFRESH_TOKENS': True,
     'BLACKLIST_AFTER_ROTATION': True,
-    'ALGORITHM': 'HS256',
+    'ALGORITHM': get_env('JWT_ALGORITHM', 'HS256'),
     'SIGNING_KEY': SECRET_KEY,
     'AUTH_HEADER_TYPES': ('Bearer',),
     'AUTH_HEADER_NAME': 'HTTP_AUTHORIZATION',
@@ -189,14 +218,14 @@ SIMPLE_JWT = {
 
 
 
-# ✅ Gmail SMTP Email Backend
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'mahdiharoun44@gmail.com'
-EMAIL_HOST_PASSWORD = 'ukpb cfzn eeky tnzo'
-DEFAULT_FROM_EMAIL = 'OptiChoice <mahdiharoun44@gmail.com>'
+# Email Backend Configuration
+EMAIL_BACKEND = get_env('EMAIL_BACKEND', 'django.core.mail.backends.smtp.EmailBackend')
+EMAIL_HOST = get_env('EMAIL_HOST', 'smtp.gmail.com')
+EMAIL_PORT = get_env('EMAIL_PORT', 587, cast=int)
+EMAIL_USE_TLS = get_env('EMAIL_USE_TLS', True, cast=bool)
+EMAIL_HOST_USER = get_env('EMAIL_HOST_USER', '')
+EMAIL_HOST_PASSWORD = get_env('EMAIL_HOST_PASSWORD', '')
+DEFAULT_FROM_EMAIL = get_env('DEFAULT_FROM_EMAIL', 'OptiChoice <noreply@optichoice.com>')
 EMAIL_SUBJECT_PREFIX = '[OptiChoice] '
 EMAIL_TIMEOUT = 30
 
@@ -204,8 +233,35 @@ EMAIL_TIMEOUT = 30
 
 
 # Session Settings
-SESSION_COOKIE_AGE = 1209600
+SESSION_COOKIE_AGE = get_env('SESSION_COOKIE_AGE', 1209600, cast=int)
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 SESSION_SAVE_EVERY_REQUEST = True
+
+# CORS Configuration (for React frontend)
+CORS_ALLOWED_ORIGINS = get_env('CORS_ALLOWED_ORIGINS', 'http://localhost:3000,http://127.0.0.1:3000', cast=list)
+CORS_ALLOW_CREDENTIALS = get_env('CORS_ALLOW_CREDENTIALS', True, cast=bool)
+CORS_ALLOW_ALL_ORIGINS = get_env('CORS_ALLOW_ALL_ORIGINS', False, cast=bool)
+
+# Additional CORS headers for API requests
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+]
+
+CORS_ALLOW_METHODS = [
+    'DELETE',
+    'GET',
+    'OPTIONS',
+    'PATCH',
+    'POST',
+    'PUT',
+]
 
 

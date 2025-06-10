@@ -34,16 +34,15 @@
             </div>
             <div class="card-body">
                 <form id="movie-recommendation-form">
-                    {% csrf_token %}
-                    <div class="form-group search-group">
+                    {% csrf_token %}                    <div class="form-group search-group">
                         <label for="movie-search" class="form-label">
-                            <i class="fas fa-film"></i> Search and Select Movies:
+                            <i class="fas fa-film"></i> Search and Select a Movie:
                         </label>
-                        <select id="movie-search" multiple="multiple" class="form-control movie-select">
+                        <select id="movie-search" class="form-control movie-select">
                             <!-- Options will be populated via AJAX -->
                         </select>
                         <small class="form-text text-muted">
-                            <i class="fas fa-info-circle"></i> Search for movies (minimum 2 characters) - Limited to 5 results for better performance
+                            <i class="fas fa-info-circle"></i> Search for a movie (minimum 2 characters) and select one to get recommendations
                         </small>
                     </div>
 
@@ -1180,17 +1179,16 @@ function setupFormSubmission() {
             showSimpleMessage('Please wait for the current request to finish.', 'warning');
             return;
         }
-        
-        // Get the movies that user selected
-        var selectedMovies = $('#movie-search').val();
-        if (!selectedMovies || selectedMovies.length === 0) {
-            showSimpleMessage('Please select at least one movie.', 'warning');
+          // Get the movie that user selected
+        var selectedMovie = $('#movie-search').val();
+        if (!selectedMovie) {
+            showSimpleMessage('Please select a movie.', 'warning');
             return;
         }
         
         // Prepare the data to send to the server
         currentRequestData = {
-            movie_titles: selectedMovies,                     // Movies user selected
+            movie_title: selectedMovie,                       // Single movie user selected
             num_recommendations: parseInt($('#num-recommendations').val()),  // How many recommendations
             model_used: $('#model-select').val(),             // Which AI model to use
             save_history: false,                              // Don't save to history yet
@@ -1314,17 +1312,15 @@ function setupSaveButton() {
         // Change button to show it's working
         var saveButton = $(this);
         var originalText = saveButton.html();
-        saveButton.html('<i class="fas fa-spinner fa-spin"></i> Saving...').prop('disabled', true);
-
-        // Prepare data to send to server
+        saveButton.html('<i class="fas fa-spinner fa-spin"></i> Saving...').prop('disabled', true);        // Prepare data to send to server
         var saveData = {
-            input_title: currentRequestData.movie_titles.join(', '),  // Original movies user picked
+            input_title: currentRequestData.movie_title,  // Original movie user picked
             selected_recommendations: {},
             model_used: currentRequestData.model_used
         };
         
         // Add selected recommendations to the data
-        saveData.selected_recommendations[currentRequestData.movie_titles.join(', ')] = selectedTitles;
+        saveData.selected_recommendations[currentRequestData.movie_title] = selectedTitles;
 
         // Send save request to server
         $.ajax({
@@ -1459,10 +1455,9 @@ function showRecommendations(data, requestData) {
             }
         }
     }
-    
-    // Build the information section showing details about the request
+      // Build the information section showing details about the request
     var infoHtml = '';
-    infoHtml += '<div class="info-item"><strong>Based on:</strong> ' + requestData.movie_titles.join(', ') + '</div>';
+    infoHtml += '<div class="info-item"><strong>Based on:</strong> ' + requestData.movie_title + '</div>';
     infoHtml += '<div class="info-item"><strong>AI Model:</strong> ' + requestData.model_used + '</div>';
     infoHtml += '<div class="info-item"><strong>Found:</strong> ' + totalCount + ' recommendations</div>';
     
@@ -1518,7 +1513,7 @@ function showError(message) {
 // Function to reset the form back to the beginning
 function resetForm() {
     showSection('input');                                     // Show the input section
-    $('#movie-search').val(null).trigger('change');          // Clear selected movies
+    $('#movie-search').val(null).trigger('change');          // Clear selected movie
     $('#model-select').val('tfidf');                         // Reset to default model
     $('#num-recommendations').val('10');                     // Reset to default number
     $('#regenerate-btn').hide();                             // Hide regenerate button
