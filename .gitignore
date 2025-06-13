@@ -1,0 +1,137 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual Environments
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+.venv/
+.env/
+pyvenv.cfg
+
+# Django
+*.log
+local_settings.py
+
+media/
+staticfiles/
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# pyenv
+.python-version
+
+# pipenv
+Pipfile.lock
+
+# Poetry
+poetry.lock
+
+# Celery
+celerybeat-schedule
+celerybeat.pid
+
+# SageMath parsed files
+*.sage.py
+
+# Spyder project settings
+.spyderproject
+.spyproject
+
+# Rope project settings
+.ropeproject
+
+# mkdocs documentation
+/site
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre type checker
+.pyre/
+
+# pytype static type analyzer
+.pytype/
+
+# Cython debug symbols
+cython_debug/
+
+# Backup files
+*.bak
+*.backup
+*.tmp
+
+# AI Model files (if you want to exclude large model files)
+# *.joblib
+# *.pkl
+# *.h5
+# *.model
+OPC/movies/joblibs/GRHR/GRHR.joblib
+OPC/movies/joblibs/KNN/reverse_mapping.joblib
+OPC/movies/joblibs/KNN/movie_mapping.joblib
+OPC/movies/joblibs/NN/final_movie_data.pkl
+OPC/movies/joblibs/NN/movie_rating_model.keras
+OPC/movies/joblibs/KNN/sparse_matrix.joblib
+OPC/movies/joblibs/KNN/knn_model.joblib
+OPC/movies/joblibs/BOW/nn_model.joblib
+OPC/movies/joblibs/BOW/tfidf_matrix.joblib
+OPC/movies/joblibs/BOW/tfidf_vectorizer.joblib
+OPC/movies/joblibs/BOW/title_to_index.joblib
+OPC/movies/joblibs/Embeddings/movie_embeddings.pt
+OPC/movies/joblibs/Embeddings/movies.pkl
+OPC/movies/joblibs/Genre-Based/genre_Based_matrix.joblib
+OPC/movies/joblibs/Genre-Based/movies_genre_based.joblib
+OPC/movies/joblibs/Genre-Based/title_index_genre-based.joblib
+OPC/movies/joblibs/GenreKnn/genre_index_to_title.joblib
+OPC/movies/joblibs/GenreKnn/genre_knn_model.joblib
+OPC/movies/joblibs/GenreKnn/genre_movies_df.joblib
+OPC/movies/joblibs/GenreKnn/genre_title_to_index.joblib
