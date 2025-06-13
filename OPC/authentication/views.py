@@ -12,7 +12,6 @@ from .forms import LoginForm , RegistrationForm , PasswordResetForm , usernameRe
 from .utility import get_jwt_tokens
 
 
-
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 from django.contrib import messages
