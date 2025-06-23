@@ -6,100 +6,65 @@
 {% block content %}
 <div class="page-header">
     <div class="header-content">
-        <h1 class="page-title">
-            Movie Recommendations
-        </h1>
-        <p class="page-subtitle">
-            Discover your next favorite movie with AI-powered recommendations
-        </p>
-    </div>
-</div>
-
-<!-- Navigation Section -->
-<div class="navigation-section">
-    <div class="nav-container">
-        <a href="{% url 'genre_recommendation_page' %}" class="nav-button">
-            <i class="fas fa-tags"></i>
-            Try Genre-Based Recommendations
-        </a>
+        <h1 class="page-title">Movie Recommendations</h1>
+        <p class="page-subtitle">Discover your next favorite movie with AI-powered recommendations</p>
     </div>
 </div>
 
 <div class="movies-container">
-    <!-- Input Section -->
-    <div class="input-section">
-        <div class="card input-card">
-            <div class="card-header">
-                <h3><i class="fas fa-search"></i> Get Movie Recommendations</h3>
-            </div>
-            <div class="card-body">
-                <form id="movie-recommendation-form">
-                    {% csrf_token %}                    <div class="form-group search-group">
-                        <label for="movie-search" class="form-label">
-                            <i class="fas fa-film"></i> Search and Select a Movie:
-                        </label>
-                        <select id="movie-search" class="form-control movie-select">
-                            <!-- Options will be populated via AJAX -->
-                        </select>
-                        <small class="form-text text-muted">
-                            <i class="fas fa-info-circle"></i> Search for a movie (minimum 2 characters) and select one to get recommendations
-                        </small>
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="model-select" class="form-label">
-                                <i class="fas fa-robot"></i> AI Model:
-                            </label>                            <select id="model-select" class="form-control">
-                                <option value="tfidf">TF-IDF (Content-Based)</option>
-                                <option value="Genre-Based">Genre-Based</option>
-                                <option value="knn">K-Nearest Neighbors</option>
-                                <option value="knn_genre">KNN with Genres</option>
-                                <option value="Embeddings">Embeddings (Advanced AI)</option>
-                                <option value="NN">Neural Network (Deep Learning)</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="num-recommendations" class="form-label">
-                                <i class="fas fa-list-ol"></i> Number of Recommendations:
-                            </label>
-                            <select id="num-recommendations" class="form-control">
-                                <option value="5"  selected>5 movies</option>
-                                <option value="10">10 movies</option>
-                                <option value="15">15 movies</option>
-                                <option value="20">20 movies</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="button-group">
-                        <button type="submit" class="btn btn-primary btn-recommend">
-                            <i class="fas fa-magic"></i> Get Recommendations
-                        </button>
-                        <button type="button" id="regenerate-btn" class="btn btn-secondary btn-regenerate" style="display: none;">
-                            <i class="fas fa-sync-alt"></i> Regenerate
-                        </button>
-                    </div>
-                </form>
-            </div>
+    <div class="card input-card">
+        <div class="card-header">
+            <h3><i class="fas fa-search"></i> Get Movie Recommendations</h3>
         </div>
-    </div>    <!-- Loading Section -->
+        <div class="card-body">
+            <form id="movie-recommendation-form">
+                {% csrf_token %}
+                <div class="form-group search-group">
+                    <label for="movie-search" class="form-label"><i class="fas fa-film"></i> Search for a Movie:</label>
+                    <input id="movie-search" class="form-control movie-search-input" type="text" placeholder="Type a movie name..." autocomplete="off" />
+                    <small class="form-text text-muted">Enter at least 2 characters</small>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="model-select" class="form-label"><i class="fas fa-robot"></i> AI Model:</label>
+                        <select id="model-select" class="form-control">
+                            <option value="tfidf">TF-IDF</option>
+                            <option value="Genre-Based">Genre-Based</option>
+                            <option value="knn">KNN</option>
+                            <option value="knn_genre">KNN+Genres</option>
+                            <option value="Embeddings">Embeddings</option>
+                            <option value="NN">Neural Net</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="num-recommendations" class="form-label"><i class="fas fa-list-ol"></i> Number:</label>
+                        <select id="num-recommendations" class="form-control">
+                            <option value="5" selected>5</option>
+                            <option value="10">10</option>
+                            <option value="15">15</option>
+                            <option value="20">20</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="button-group">
+                    <button type="submit" class="btn btn-primary btn-recommend"><i class="fas fa-magic"></i> Recommend</button>
+                    <button type="button" id="regenerate-btn" class="btn btn-secondary btn-regenerate" style="display: none;"><i class="fas fa-sync-alt"></i> Regenerate</button>
+                </div>
+            </form>
+        </div>
+    </div>
     <div id="loading-section" class="loading-section" style="display: none;">
         <div class="card loading-card">
             <div class="card-body text-center">
                 <div class="loading-spinner">
-                    <div class="progress-container">
-                        <div class="progress-bar"></div>
-                    </div>
+                    <div class="progress-container"><div class="progress-bar"></div></div>
                     <div class="progress-text">Analyzing your preferences...</div>
                 </div>
-                <h4 class="loading-title">Finding Perfect Matches</h4>
-                <p class="loading-text">Using AI algorithms to discover movies you'll love...</p>
+                <h4 class="loading-title">Finding Matches</h4>
+                <p class="loading-text">Using AI to discover movies you'll love...</p>
             </div>
         </div>
     </div>
-
-    <!-- Results Section -->
     <div id="results-section" class="results-section" style="display: none;">
         <div class="card results-card">
             <div class="card-header results-header">
@@ -108,58 +73,75 @@
                     <div id="recommendation-info" class="recommendation-info"></div>
                 </div>
                 <div class="results-actions">
-                    <button id="select-all-btn" class="btn btn-outline-primary">
-                        <i class="fas fa-check-double"></i> Select All
-                    </button>
-                    <button id="save-selected-btn" class="btn btn-success" style="display: none;">
-                        <i class="fas fa-save"></i> Save Selected (<span id="selected-count">0</span>)
-                    </button>
+                    <button id="select-all-btn" class="btn btn-outline-primary"><i class="fas fa-check-double"></i> Select All</button>
+                    <button id="save-selected-btn" class="btn btn-success" style="display: none;"><i class="fas fa-save"></i> Save (<span id="selected-count">0</span>)</button>
                 </div>
             </div>
             <div class="card-body">
-                <div id="recommendations-grid" class="recommendations-grid">
-                    <!-- Recommendations will be populated here -->
-                </div>
+                <div id="recommendations-grid" class="recommendations-grid"></div>
             </div>
         </div>
     </div>
-
-    <!-- Error Section -->
     <div id="error-section" class="error-section" style="display: none;">
         <div class="card error-card">
             <div class="card-body text-center">
                 <i class="fas fa-exclamation-triangle error-icon"></i>
                 <h4 class="error-title">Something went wrong</h4>
                 <p id="error-message" class="error-message"></p>
-                <button onclick="resetForm()" class="btn btn-primary">
-                    <i class="fas fa-redo"></i> Try Again
-                </button>
+                <button onclick="resetForm()" class="btn btn-primary"><i class="fas fa-redo"></i> Try Again</button>
             </div>
         </div>
     </div>
 </div>
 
 <style>
-    
 :root {
-    --primary: #4f46e5;
-    --primary-light: #818cf8;
+    --primary: #6366f1;
+    --primary-light: #a5b4fc;
     --primary-dark: #3730a3;
-    --success: #10b981;
+    --success: #22c55e;
     --danger: #ef4444;
     --warning: #f59e0b;
     --bg: #f8fafc;
-    --bg-dark: #e2e8f0;
+    --bg-dark: #18181b;
     --border: #e5e7eb;
+    --border-dark: #27272a;
     --card-bg: #ffffff;
+    --card-bg-dark: #23232b;
     --text: #1f2937;
     --text-light: #6b7280;
     --text-muted: #9ca3af;
+    --text-dark: #f3f4f6;
     --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
     --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
     --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
     --gradient-primary: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
     --gradient-success: linear-gradient(135deg, var(--success) 0%, #34d399 100%);
+}
+[data-theme="dark"] {
+    --bg: var(--bg-dark);
+    --card-bg: var(--card-bg-dark);
+    --border: var(--border-dark);
+    --text: var(--text-dark);
+}
+
+/* Modern Search Box */
+.movie-search-input {
+    width: 100%;
+    min-height: 48px;
+    border-radius: 10px;
+    border: 2px solid var(--border);
+    font-size: 1rem;
+    color: var(--text);
+    background: var(--card-bg);
+    box-shadow: var(--shadow-sm);
+    padding: 0.5rem 1rem;
+    transition: border 0.2s, box-shadow 0.2s;
+}
+.movie-search-input:focus {
+    border-color: var(--primary);
+    outline: none;
+    box-shadow: 0 0 0 2px var(--primary);
 }
 
 /* Enhanced Page Layout */
@@ -857,6 +839,1223 @@
     margin-top: 1rem;
 }
 
+/* Enhanced Loading Animation with Progress Bar */
+.loading-card {
+    background: var(--gradient-primary);
+    color: white;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.loading-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+    animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+    0% { left: -100%; }
+    100% { left: 100%; }
+}
+
+.loading-spinner {
+    margin: 1.5rem auto;
+    width: 100%;
+    max-width: 300px;
+    position: relative;
+}
+
+.progress-container {
+    width: 100%;
+    height: 8px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+    overflow: hidden;
+    position: relative;
+    margin: 1rem auto;
+}
+
+.progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, rgba(255,255,255,0.8), white, rgba(255,255,255,0.8));
+    border-radius: 4px;
+    width: 0%;
+    animation: progressLoad 3s ease-in-out infinite;
+    position: relative;
+}
+
+.progress-bar::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent);
+    animation: progressShine 1.5s ease-in-out infinite;
+}
+
+@keyframes progressLoad {
+    0% { width: 0%; }
+    25% { width: 30%; }
+    50% { width: 60%; }
+    75% { width: 85%; }
+    100% { width: 95%; }
+}
+
+@keyframes progressShine {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+.progress-text {
+    font-size: 0.85rem;
+    opacity: 0.9;
+    margin-top: 0.5rem;
+    animation: progressTextCycle 4s ease-in-out infinite;
+}
+
+@keyframes progressTextCycle {
+    0%, 25% { opacity: 0.9; }
+    12.5% { opacity: 1; }
+    75%, 100% { opacity: 0.7; }
+    87.5% { opacity: 1; }
+}
+
+.loading-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    animation: pulse 2s ease-in-out infinite;
+}
+
+.loading-text {
+    font-size: 0.9rem;
+    margin: 0;
+    opacity: 0.9;
+    animation: fadeInOut 3s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+@keyframes fadeInOut {
+    0%, 100% { opacity: 0.9; }
+    50% { opacity: 0.6; }
+}
+
+/* Results Section */
+.results-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.results-title h3 {
+    margin: 0 0 1rem;
+}
+
+.results-actions {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.recommendation-info {
+    background: rgba(0, 123, 255, 0.1);
+    border: 1px solid rgba(0, 123, 255, 0.2);
+    border-radius: 4px;
+    padding: 0.75rem;
+    color: var(--text);
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+}
+
+/* Enhanced Recommendations Grid */
+.recommendations-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.25rem;
+    margin-top: 1.5rem;
+    padding: 0;
+    animation: fadeInUp 0.6s ease-out;
+}
+
+@keyframes fadeInUp {
+    0% {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Enhanced Movie Cards */
+.movie-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem;
+    position: relative;
+    cursor: pointer;
+    margin-bottom: 0.75rem;
+    transition: all 0.2s ease;
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+    animation: slideInCard 0.5s ease-out both;
+}
+
+.movie-card:nth-child(1) { animation-delay: 0.1s; }
+.movie-card:nth-child(2) { animation-delay: 0.2s; }
+.movie-card:nth-child(3) { animation-delay: 0.3s; }
+.movie-card:nth-child(4) { animation-delay: 0.4s; }
+.movie-card:nth-child(5) { animation-delay: 0.5s; }
+.movie-card:nth-child(6) { animation-delay: 0.6s; }
+.movie-card:nth-child(7) { animation-delay: 0.7s; }
+.movie-card:nth-child(8) { animation-delay: 0.8s; }
+.movie-card:nth-child(9) { animation-delay: 0.9s; }
+.movie-card:nth-child(10) { animation-delay: 1s; }
+
+@keyframes slideInCard {
+    0% {
+        opacity: 0;
+        transform: translateY(30px) scale(0.95);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.movie-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--primary-light);
+}
+
+.movie-card:hover::before {
+    left: 0;
+}
+
+.movie-card.selected {
+    border-color: var(--primary);
+    background: linear-gradient(135deg, rgba(79, 70, 229, 0.05) 0%, rgba(129, 140, 248, 0.1) 100%);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
+}
+
+.movie-card.selected::before {
+    left: 0;
+    background: var(--gradient-success);
+}
+
+/* Enhanced Checkbox Styling */
+.movie-checkbox {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    width: 1.5rem;
+    height: 1.5rem;
+    cursor: pointer;
+    z-index: 2;
+    accent-color: var(--primary);
+    transform: scale(1.1);
+    transition: transform 0.2s ease;
+}
+
+.movie-checkbox:hover {
+    transform: scale(1.2);
+}
+
+.movie-checkbox:checked {
+    animation: checkboxPulse 0.3s ease;
+}
+
+@keyframes checkboxPulse {
+    0% { transform: scale(1.1); }
+    50% { transform: scale(1.3); }
+    100% { transform: scale(1.1); }
+}
+
+/* Enhanced Movie Title */
+.movie-title {
+    color: var(--text);
+    font-size: 1.15rem;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+    margin-right: 2.5rem;
+    line-height: 1.4;
+    transition: color 0.2s ease;
+}
+
+.movie-card:hover .movie-title {
+    color: var(--primary);
+}
+
+/* Enhanced Input Source */
+.input-source {
+    color: var(--text-light);
+    font-size: 0.8rem;
+    font-style: italic;
+    margin-top: 0.75rem;
+    padding: 0.5rem 0.75rem;
+    background: linear-gradient(135deg, rgba(79, 70, 229, 0.08) 0%, rgba(129, 140, 248, 0.12) 100%);
+    border-radius: 6px;
+    border-left: 3px solid var(--primary-light);
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.input-source::before {
+    content: '🎬';
+    font-style: normal;
+    opacity: 0.7;
+}
+
+.movie-card:hover .input-source {
+    background: linear-gradient(135deg, rgba(79, 70, 229, 0.12) 0%, rgba(129, 140, 248, 0.16) 100%);
+    border-left-color: var(--primary);
+}
+
+/* No Results Message */
+.no-results {
+    text-align: center;
+    padding: 2rem 1rem;
+    color: var(--text-light);
+    grid-column: 1 / -1;
+}
+
+.no-results i {
+    font-size: 2.5rem;
+    color: var(--text-light);
+    margin-bottom: 0.5rem;
+    opacity: 0.7;
+}
+
+.no-results h4 {
+    color: var(--text);
+    font-size: 1.3rem;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+.no-results p {
+    font-size: 0.9rem;
+    opacity: 0.8;
+    line-height: 1.4;
+}
+
+/* Buttons */
+.btn {
+    padding: 0.6rem 1rem;
+    border-radius: 6px;
+    font-weight: 500;
+    border: 1px solid transparent;
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+
+.btn-primary {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+}
+
+.btn-primary:hover {
+    opacity: 0.9;
+}
+
+.btn-secondary {
+    background: #6c757d;
+    color: white;
+}
+
+.btn-outline-primary {
+    background: transparent;
+    color: var(--primary);
+    border-color: var(--primary);
+}
+
+.btn-outline-primary:hover {
+    background: var(--primary);
+    color: white;
+}
+
+.btn-success {
+    background: var(--success);
+    color: white;
+}
+
+.button-group {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+/* Enhanced Loading Animation with Progress Bar */
+.loading-card {
+    background: var(--gradient-primary);
+    color: white;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.loading-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+    animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+    0% { left: -100%; }
+    100% { left: 100%; }
+}
+
+.loading-spinner {
+    margin: 1.5rem auto;
+    width: 100%;
+    max-width: 300px;
+    position: relative;
+}
+
+.progress-container {
+    width: 100%;
+    height: 8px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+    overflow: hidden;
+    position: relative;
+    margin: 1rem auto;
+}
+
+.progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, rgba(255,255,255,0.8), white, rgba(255,255,255,0.8));
+    border-radius: 4px;
+    width: 0%;
+    animation: progressLoad 3s ease-in-out infinite;
+    position: relative;
+}
+
+.progress-bar::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent);
+    animation: progressShine 1.5s ease-in-out infinite;
+}
+
+@keyframes progressLoad {
+    0% { width: 0%; }
+    25% { width: 30%; }
+    50% { width: 60%; }
+    75% { width: 85%; }
+    100% { width: 95%; }
+}
+
+@keyframes progressShine {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+.progress-text {
+    font-size: 0.85rem;
+    opacity: 0.9;
+    margin-top: 0.5rem;
+    animation: progressTextCycle 4s ease-in-out infinite;
+}
+
+@keyframes progressTextCycle {
+    0%, 25% { opacity: 0.9; }
+    12.5% { opacity: 1; }
+    75%, 100% { opacity: 0.7; }
+    87.5% { opacity: 1; }
+}
+
+.loading-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    animation: pulse 2s ease-in-out infinite;
+}
+
+.loading-text {
+    font-size: 0.9rem;
+    margin: 0;
+    opacity: 0.9;
+    animation: fadeInOut 3s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+@keyframes fadeInOut {
+    0%, 100% { opacity: 0.9; }
+    50% { opacity: 0.6; }
+}
+
+/* Results Section */
+.results-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.results-title h3 {
+    margin: 0 0 1rem;
+}
+
+.results-actions {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.recommendation-info {
+    background: rgba(0, 123, 255, 0.1);
+    border: 1px solid rgba(0, 123, 255, 0.2);
+    border-radius: 4px;
+    padding: 0.75rem;
+    color: var(--text);
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+}
+
+/* Enhanced Recommendations Grid */
+.recommendations-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.25rem;
+    margin-top: 1.5rem;
+    padding: 0;
+    animation: fadeInUp 0.6s ease-out;
+}
+
+@keyframes fadeInUp {
+    0% {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Enhanced Movie Cards */
+.movie-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem;
+    position: relative;
+    cursor: pointer;
+    margin-bottom: 0.75rem;
+    transition: all 0.2s ease;
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+    animation: slideInCard 0.5s ease-out both;
+}
+
+.movie-card:nth-child(1) { animation-delay: 0.1s; }
+.movie-card:nth-child(2) { animation-delay: 0.2s; }
+.movie-card:nth-child(3) { animation-delay: 0.3s; }
+.movie-card:nth-child(4) { animation-delay: 0.4s; }
+.movie-card:nth-child(5) { animation-delay: 0.5s; }
+.movie-card:nth-child(6) { animation-delay: 0.6s; }
+.movie-card:nth-child(7) { animation-delay: 0.7s; }
+.movie-card:nth-child(8) { animation-delay: 0.8s; }
+.movie-card:nth-child(9) { animation-delay: 0.9s; }
+.movie-card:nth-child(10) { animation-delay: 1s; }
+
+@keyframes slideInCard {
+    0% {
+        opacity: 0;
+        transform: translateY(30px) scale(0.95);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.movie-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--primary-light);
+}
+
+.movie-card:hover::before {
+    left: 0;
+}
+
+.movie-card.selected {
+    border-color: var(--primary);
+    background: linear-gradient(135deg, rgba(79, 70, 229, 0.05) 0%, rgba(129, 140, 248, 0.1) 100%);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
+}
+
+.movie-card.selected::before {
+    left: 0;
+    background: var(--gradient-success);
+}
+
+/* Enhanced Checkbox Styling */
+.movie-checkbox {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    width: 1.5rem;
+    height: 1.5rem;
+    cursor: pointer;
+    z-index: 2;
+    accent-color: var(--primary);
+    transform: scale(1.1);
+    transition: transform 0.2s ease;
+}
+
+.movie-checkbox:hover {
+    transform: scale(1.2);
+}
+
+.movie-checkbox:checked {
+    animation: checkboxPulse 0.3s ease;
+}
+
+@keyframes checkboxPulse {
+    0% { transform: scale(1.1); }
+    50% { transform: scale(1.3); }
+    100% { transform: scale(1.1); }
+}
+
+/* Enhanced Movie Title */
+.movie-title {
+    color: var(--text);
+    font-size: 1.15rem;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+    margin-right: 2.5rem;
+    line-height: 1.4;
+    transition: color 0.2s ease;
+}
+
+.movie-card:hover .movie-title {
+    color: var(--primary);
+}
+
+/* Enhanced Input Source */
+.input-source {
+    color: var(--text-light);
+    font-size: 0.8rem;
+    font-style: italic;
+    margin-top: 0.75rem;
+    padding: 0.5rem 0.75rem;
+    background: linear-gradient(135deg, rgba(79, 70, 229, 0.08) 0%, rgba(129, 140, 248, 0.12) 100%);
+    border-radius: 6px;
+    border-left: 3px solid var(--primary-light);
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.input-source::before {
+    content: '🎬';
+    font-style: normal;
+    opacity: 0.7;
+}
+
+.movie-card:hover .input-source {
+    background: linear-gradient(135deg, rgba(79, 70, 229, 0.12) 0%, rgba(129, 140, 248, 0.16) 100%);
+    border-left-color: var(--primary);
+}
+
+/* No Results Message */
+.no-results {
+    text-align: center;
+    padding: 2rem 1rem;
+    color: var(--text-light);
+    grid-column: 1 / -1;
+}
+
+.no-results i {
+    font-size: 2.5rem;
+    color: var(--text-light);
+    margin-bottom: 0.5rem;
+    opacity: 0.7;
+}
+
+.no-results h4 {
+    color: var(--text);
+    font-size: 1.3rem;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+.no-results p {
+    font-size: 0.9rem;
+    opacity: 0.8;
+    line-height: 1.4;
+}
+
+/* Buttons */
+.btn {
+    padding: 0.6rem 1rem;
+    border-radius: 6px;
+    font-weight: 500;
+    border: 1px solid transparent;
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+
+.btn-primary {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+}
+
+.btn-primary:hover {
+    opacity: 0.9;
+}
+
+.btn-secondary {
+    background: #6c757d;
+    color: white;
+}
+
+.btn-outline-primary {
+    background: transparent;
+    color: var(--primary);
+    border-color: var(--primary);
+}
+
+.btn-outline-primary:hover {
+    background: var(--primary);
+    color: white;
+}
+
+.btn-success {
+    background: var(--success);
+    color: white;
+}
+
+.button-group {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+/* Enhanced Loading Animation with Progress Bar */
+.loading-card {
+    background: var(--gradient-primary);
+    color: white;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.loading-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+    animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+    0% { left: -100%; }
+    100% { left: 100%; }
+}
+
+.loading-spinner {
+    margin: 1.5rem auto;
+    width: 100%;
+    max-width: 300px;
+    position: relative;
+}
+
+.progress-container {
+    width: 100%;
+    height: 8px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+    overflow: hidden;
+    position: relative;
+    margin: 1rem auto;
+}
+
+.progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, rgba(255,255,255,0.8), white, rgba(255,255,255,0.8));
+    border-radius: 4px;
+    width: 0%;
+    animation: progressLoad 3s ease-in-out infinite;
+    position: relative;
+}
+
+.progress-bar::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent);
+    animation: progressShine 1.5s ease-in-out infinite;
+}
+
+@keyframes progressLoad {
+    0% { width: 0%; }
+    25% { width: 30%; }
+    50% { width: 60%; }
+    75% { width: 85%; }
+    100% { width: 95%; }
+}
+
+@keyframes progressShine {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+.progress-text {
+    font-size: 0.85rem;
+    opacity: 0.9;
+    margin-top: 0.5rem;
+    animation: progressTextCycle 4s ease-in-out infinite;
+}
+
+@keyframes progressTextCycle {
+    0%, 25% { opacity: 0.9; }
+    12.5% { opacity: 1; }
+    75%, 100% { opacity: 0.7; }
+    87.5% { opacity: 1; }
+}
+
+.loading-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    animation: pulse 2s ease-in-out infinite;
+}
+
+.loading-text {
+    font-size: 0.9rem;
+    margin: 0;
+    opacity: 0.9;
+    animation: fadeInOut 3s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+@keyframes fadeInOut {
+    0%, 100% { opacity: 0.9; }
+    50% { opacity: 0.6; }
+}
+
+/* Results Section */
+.results-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.results-title h3 {
+    margin: 0 0 1rem;
+}
+
+.results-actions {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.recommendation-info {
+    background: rgba(0, 123, 255, 0.1);
+    border: 1px solid rgba(0, 123, 255, 0.2);
+    border-radius: 4px;
+    padding: 0.75rem;
+    color: var(--text);
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+}
+
+/* Enhanced Recommendations Grid */
+.recommendations-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.25rem;
+    margin-top: 1.5rem;
+    padding: 0;
+    animation: fadeInUp 0.6s ease-out;
+}
+
+@keyframes fadeInUp {
+    0% {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Enhanced Movie Cards */
+.movie-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem;
+    position: relative;
+    cursor: pointer;
+    margin-bottom: 0.75rem;
+    transition: all 0.2s ease;
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+    animation: slideInCard 0.5s ease-out both;
+}
+
+.movie-card:nth-child(1) { animation-delay: 0.1s; }
+.movie-card:nth-child(2) { animation-delay: 0.2s; }
+.movie-card:nth-child(3) { animation-delay: 0.3s; }
+.movie-card:nth-child(4) { animation-delay: 0.4s; }
+.movie-card:nth-child(5) { animation-delay: 0.5s; }
+.movie-card:nth-child(6) { animation-delay: 0.6s; }
+.movie-card:nth-child(7) { animation-delay: 0.7s; }
+.movie-card:nth-child(8) { animation-delay: 0.8s; }
+.movie-card:nth-child(9) { animation-delay: 0.9s; }
+.movie-card:nth-child(10) { animation-delay: 1s; }
+
+@keyframes slideInCard {
+    0% {
+        opacity: 0;
+        transform: translateY(30px) scale(0.95);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.movie-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--primary-light);
+}
+
+.movie-card:hover::before {
+    left: 0;
+}
+
+.movie-card.selected {
+    border-color: var(--primary);
+    background: linear-gradient(135deg, rgba(79, 70, 229, 0.05) 0%, rgba(129, 140, 248, 0.1) 100%);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
+}
+
+.movie-card.selected::before {
+    left: 0;
+    background: var(--gradient-success);
+}
+
+/* Enhanced Checkbox Styling */
+.movie-checkbox {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    width: 1.5rem;
+    height: 1.5rem;
+    cursor: pointer;
+    z-index: 2;
+    accent-color: var(--primary);
+    transform: scale(1.1);
+    transition: transform 0.2s ease;
+}
+
+.movie-checkbox:hover {
+    transform: scale(1.2);
+}
+
+.movie-checkbox:checked {
+    animation: checkboxPulse 0.3s ease;
+}
+
+@keyframes checkboxPulse {
+    0% { transform: scale(1.1); }
+    50% { transform: scale(1.3); }
+    100% { transform: scale(1.1); }
+}
+
+/* Enhanced Movie Title */
+.movie-title {
+    color: var(--text);
+    font-size: 1.15rem;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+    margin-right: 2.5rem;
+    line-height: 1.4;
+    transition: color 0.2s ease;
+}
+
+.movie-card:hover .movie-title {
+    color: var(--primary);
+}
+
+/* Enhanced Input Source */
+.input-source {
+    color: var(--text-light);
+    font-size: 0.8rem;
+    font-style: italic;
+    margin-top: 0.75rem;
+    padding: 0.5rem 0.75rem;
+    background: linear-gradient(135deg, rgba(79, 70, 229, 0.08) 0%, rgba(129, 140, 248, 0.12) 100%);
+    border-radius: 6px;
+    border-left: 3px solid var(--primary-light);
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.input-source::before {
+    content: '🎬';
+    font-style: normal;
+    opacity: 0.7;
+}
+
+.movie-card:hover .input-source {
+    background: linear-gradient(135deg, rgba(79, 70, 229, 0.12) 0%, rgba(129, 140, 248, 0.16) 100%);
+    border-left-color: var(--primary);
+}
+
+/* No Results Message */
+.no-results {
+    text-align: center;
+    padding: 2rem 1rem;
+    color: var(--text-light);
+    grid-column: 1 / -1;
+}
+
+.no-results i {
+    font-size: 2.5rem;
+    color: var(--text-light);
+    margin-bottom: 0.5rem;
+    opacity: 0.7;
+}
+
+.no-results h4 {
+    color: var(--text);
+    font-size: 1.3rem;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+.no-results p {
+    font-size: 0.9rem;
+    opacity: 0.8;
+    line-height: 1.4;
+}
+
+/* Buttons */
+.btn {
+    padding: 0.6rem 1rem;
+    border-radius: 6px;
+    font-weight: 500;
+    border: 1px solid transparent;
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+
+.btn-primary {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+}
+
+.btn-primary:hover {
+    opacity: 0.9;
+}
+
+.btn-secondary {
+    background: #6c757d;
+    color: white;
+}
+
+.btn-outline-primary {
+    background: transparent;
+    color: var(--primary);
+    border-color: var(--primary);
+}
+
+.btn-outline-primary:hover {
+    background: var(--primary);
+    color: white;
+}
+
+.btn-success {
+    background: var(--success);
+    color: white;
+}
+
+.button-group {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+/* Enhanced Loading Animation with Progress Bar */
+.loading-card {
+    background: var(--gradient-primary);
+    color: white;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.loading-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+    animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+    0% { left: -100%; }
+    100% { left: 100%; }
+}
+
+.loading-spinner {
+    margin: 1.5rem auto;
+    width: 100%;
+    max-width: 300px;
+    position: relative;
+}
+
+.progress-container {
+    width: 100%;
+    height: 8px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+    overflow: hidden;
+    position: relative;
+    margin: 1rem auto;
+}
+
+.progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, rgba(255,255,255,0.8), white, rgba(255,255,255,0.8));
+    border-radius: 4px;
+    width: 0%;
+    animation: progressLoad 3s ease-in-out infinite;
+    position: relative;
+}
+
+.progress-bar::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent);
+    animation: progressShine 1.5s ease-in-out infinite;
+}
+
+@keyframes progressLoad {
+    0% { width: 0%; }
+    25% { width: 30%; }
+    50% { width: 60%; }
+    75% { width: 85%; }
+    100% { width: 95%; }
+}
+
+@keyframes progressShine {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+.progress-text {
+    font-size: 0.85rem;
+    opacity: 0.9;
+    margin-top: 0.5rem;
+    animation: progressTextCycle 4s ease-in-out infinite;
+}
+
+@keyframes progressTextCycle {
+    0%, 25% { opacity: 0.9; }
+    12.5% { opacity: 1; }
+    75%, 100% { opacity: 0.7; }
+    87.5% { opacity: 1; }
+}
+
+.loading-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    animation: pulse 2s ease-in-out infinite;
+}
+
+.loading-text {
+    font-size: 0.9rem;
+    margin: 0;
+    opacity: 0.9;
+    animation: fadeInOut 3s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+@keyframes fadeInOut {
+    0%, 100% { opacity: 0.9; }
+    50% { opacity: 0.6; }
+}
+
 /* Error Section */
 .error-card {
     background: var(--danger);
@@ -892,120 +2091,32 @@
     gap: 0.3rem;
 }
 
-/* Responsive Design */
-@media (max-width: 992px) {
-    .movies-container {
-        padding: 0 1rem 1.5rem;
-    }
-    
-    .form-row {
-        grid-template-columns: 1fr;
-        gap: 1rem;
-    }
-    
-    .recommendations-grid {
-        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-        gap: 1rem;
-    }
-    
-    .results-header {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 0.75rem;
-    }
-    
-    .results-actions {
-        justify-content: center;
-        gap: 0.75rem;
-    }
-    
-    .card-header {
-        padding: 1rem;
-    }
-    
-    .card-body {
-        padding: 1rem;
-    }
+/* Autocomplete Styles */
+.autocomplete-suggestions {
+    position: absolute;
+    z-index: 1000;
+    background: var(--card-bg);
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+    width: 100%;
+    max-height: 220px;
+    overflow-y: auto;
+    margin-top: 2px;
+    padding: 0.25rem 0;
 }
-
-@media (max-width: 768px) {
-    .movies-container {
-        padding: 0 0.75rem 1.5rem;
-    }
-  
-    
-    .page-title {
-        font-size: 2rem;
-    }
-    
-    .page-subtitle {
-        font-size: 1rem;
-    }
-    
-    .card-body {
-        padding: 0.75rem;
-    }
-    
-    .card-header {
-        padding: 0.75rem;
-    }
-    
-    .recommendations-grid {
-        grid-template-columns: 1fr;
-        gap: 0.75rem;
-    }
-    
-    .movie-card {
-        padding: 0.75rem;
-    }
-    
-    .btn-submit {
-        padding: 0.75rem 1rem;
-        font-size: 0.9rem;
-    }
-    
-    .results-actions {
-        flex-direction: column;
-        gap: 0.5rem;
-    }
-    
-    .btn {
-        width: 100%;
-        justify-content: center;
-        padding: 0.65rem 1rem;
-    }
-    
-    .form-group {
-        margin-bottom: 1rem;
-    }
+.autocomplete-suggestion {
+    padding: 0.6rem 1rem;
+    cursor: pointer;
+    color: var(--text);
+    font-size: 1rem;
+    transition: background 0.15s;
 }
-
-@media (max-width: 480px) {
-    .page-header {
-        padding: 0.75rem 0.5rem;
-    }
-  
-    
-    .page-title {
-        font-size: 1.8rem;
-    }
-    
-    .card-body {
-        padding: 0.5rem;
-    }
-    
-    .card-header {
-        padding: 0.5rem;
-    }
-    
-    .form-control {
-        padding: 0.6rem 0.75rem;
-    }
-    
-    .movie-card {
-        padding: 0.6rem;
-    }
+.autocomplete-suggestion:hover, .autocomplete-suggestion.active {
+    background: var(--primary);
+    color: #fff;
 }
+.search-group { position: relative; }
 </style>
 
 <script>
@@ -1028,9 +2139,6 @@ setInterval(function() {
 // When the webpage loads completely, setup all the features
 $(document).ready(function() {
     
-    // Setup the movie search dropdown box
-    setupMovieSearchBox();
-    
     // Setup what happens when user submits the form
     setupFormSubmission();
     
@@ -1045,161 +2153,66 @@ $(document).ready(function() {
     
     // Setup the "Regenerate" button
     setupRegenerateButton();
-});
+    
+    let debounceTimeout;
+    let selectedIndex = -1;
+    let suggestions = [];
+    const $input = $('#movie-search');
+    const $group = $input.closest('.search-group');
+    // Remove any old suggestion box
+    $group.find('.autocomplete-suggestions').remove();
+    // Create suggestion box
+    const $suggestionsBox = $('<div class="autocomplete-suggestions" style="display:none;"></div>');
+    $group.append($suggestionsBox);
 
-// Function to create the movie search dropdown box
-function setupMovieSearchBox() {
-    $('#movie-search').select2({
-        ajax: {
-            url: '/api/movies/search/',        // Where to get movie data from
-            dataType: 'json',                 // Expect JSON response            delay: 400,                       // Wait 400ms before searching
-            data: function (params) {
-                // Send the search term and pagination parameters to the server
-                return { 
-                    search: params.term,
-                    limit: 5,          // Request up to 10 results
-                    offset: 0           // Start from the beginning
-                };
-            },
-            processResults: function (data) {
-                // Process the results from the server with offset pagination support
-                var searchTerm = data.term || '';
-                
-                // Handle the new offset pagination response format
-                var movies = [];
-                var pagination = null;
-                
-                if (data && data.results && Array.isArray(data.results)) {
-                    // Direct results array (non-paginated or already extracted)
-                    movies = data.results;
-                } else if (data && data.count !== undefined && data.results) {
-                    // New offset pagination format with metadata
-                    movies = data.results;
-                    pagination = {
-                        count: data.count,
-                        has_next: data.has_next,
-                        has_previous: data.has_previous,
-                        current_page: data.current_page,
-                        total_pages: data.total_pages
-                    };
-                } else {
-                    // Legacy format or empty results
-                    movies = [];
-                }
-                
-                // Limit results for dropdown performance
-                movies = movies.slice(0, 10);
-                
-                // Cache results with pagination info
-                if (searchTerm && movies.length > 0) {
-                    searchResults[searchTerm] = {
-                        movies: movies,
-                        pagination: pagination
-                    };
-                }
-                
-                // Convert movie data to format the dropdown understands
-                var selectOptions = [];
-                for (var i = 0; i < movies.length; i++) {
-                    selectOptions.push({
-                        id: movies[i].title,
-                        text: movies[i].title,
-                        data: movies[i]
+    $input.on('input', function() {
+        const val = $input.val();
+        $suggestionsBox.empty().hide();
+        selectedIndex = -1;
+        if (val.length < 2) return;
+        clearTimeout(debounceTimeout);
+        debounceTimeout = setTimeout(function() {
+            $.get('/api/movies/search/', { search: val, limit: 8 }, function(data) {
+                suggestions = (data.results || []).map(m => m.title);
+                if (suggestions.length === 0) return;
+                $suggestionsBox.empty();
+                suggestions.forEach((title, idx) => {
+                    const $item = $('<div class="autocomplete-suggestion"></div>').text(title);
+                    $item.on('mousedown', function(e) {
+                        e.preventDefault();
+                        $input.val(title);
+                        $suggestionsBox.hide();
                     });
-                }
-                
-                // Add pagination info to the results if available
-                var result = { results: selectOptions };
-                if (pagination) {
-                    result.pagination = pagination;
-                }
-                
-                return result;
-            },
-            cache: true,                      // Cache results for better performance
-            transport: function (params, success, failure) {
-                // Enhanced function to handle the search request with pagination
-                
-                // Don't make request if one is already running
-                if (isRequestInProgress) {
-                    return;
-                }
-                
-                // Get search term and pagination parameters
-                var searchTerm = params.data.search;
-                var limit = params.data.limit || 10;
-                var offset = params.data.offset || 0;
-                
-                // Create cache key with pagination parameters
-                var cacheKey = searchTerm + '_' + limit + '_' + offset;
-                
-                // Check if we already have this exact search result cached
-                if (searchResults[cacheKey]) {
-                    var cachedData = searchResults[cacheKey];
-                    success({ 
-                        results: cachedData.movies || cachedData,
-                        pagination: cachedData.pagination 
-                    });
-                    return;
-                }
-                
-                // Don't repeat the exact same search
-                if (searchTerm === lastSearchTerm) {
-                    return;
-                }
-                lastSearchTerm = searchTerm;
-                
-                // Make the actual search request to server with pagination
-                isRequestInProgress = true;
-                return $.ajax(params)
-                    .done(function(response) {
-                        // Cache the response with pagination info
-                        if (searchTerm && response) {
-                            searchResults[cacheKey] = {
-                                movies: response.results || [],
-                                pagination: {
-                                    count: response.count,
-                                    has_next: response.has_next,
-                                    has_previous: response.has_previous,
-                                    current_page: response.current_page,
-                                    total_pages: response.total_pages
-                                }
-                            };
-                        }
-                        success(response);
-                    })
-                    .fail(failure)
-                    .always(function() {
-                        isRequestInProgress = false;
-                    });
+                    $suggestionsBox.append($item);
+                });
+                $suggestionsBox.show();
+            });
+        }, 200);
+    });
+    $input.on('keydown', function(e) {
+        if (!$suggestionsBox.is(':visible')) return;
+        if (e.key === 'ArrowDown') {
+            selectedIndex = Math.min(selectedIndex + 1, suggestions.length - 1);
+            $suggestionsBox.children().removeClass('active').eq(selectedIndex).addClass('active');
+            e.preventDefault();
+        } else if (e.key === 'ArrowUp') {
+            selectedIndex = Math.max(selectedIndex - 1, 0);
+            $suggestionsBox.children().removeClass('active').eq(selectedIndex).addClass('active');
+            e.preventDefault();
+        } else if (e.key === 'Enter') {
+            if (selectedIndex >= 0 && suggestions[selectedIndex]) {
+                $input.val(suggestions[selectedIndex]);
+                $suggestionsBox.hide();
+                e.preventDefault();
             }
-        },
-        placeholder: '🎬 Type to search movies...',    // Helpful text for users
-        minimumInputLength: 2,                         // Need at least 2 characters to search
-        allowClear: true,                              // Allow users to clear selection
-        width: '100%',                                 // Full width of container
-        theme: 'default',
-        dropdownAutoWidth: true,
-        language: {
-            inputTooShort: function (args) {
-                return "Enter " + args.minimum + "+ chars";
-            },
-            noResults: function () {
-                return "No movies found";
-            },
-            searching: function () {
-                return "Searching...";
-            }
-        },
-        escapeMarkup: function (markup) { return markup; },
-        templateResult: function(movie) {
-            if (movie.loading) return movie.text;
-            return movie.data ? movie.data.title : movie.text;
-        },        templateSelection: function(movie) {
-            return movie.data ? movie.data.title : movie.text;
+        } else if (e.key === 'Escape') {
+            $suggestionsBox.hide();
         }
     });
-}
+    $input.on('blur', function() {
+        setTimeout(() => $suggestionsBox.hide(), 150);
+    });
+});
 
 // Function to handle what happens when user submits the form
 function setupFormSubmission() {
@@ -1680,7 +2693,7 @@ function showSimpleMessage(message, type) {
     messageHtml += 'background: none; border: none; color: ' + config.color + '; ';
     messageHtml += 'cursor: pointer; padding: 0; font-size: 1.2rem; ';
     messageHtml += 'flex-shrink: 0; opacity: 0.7; transition: opacity 0.2s ease;"';
-    messageHtml += 'onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.7">';
+    messageHtml += 'onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.7">'; 
     messageHtml += '×</button>';
     messageHtml += '</div>';
     

@@ -3,6 +3,36 @@
 
 {% block content %}
 <style>
+:root {
+    --primary: #6366f1;
+    --primary-light: #a5b4fc;
+    --primary-dark: #3730a3;
+    --success: #22c55e;
+    --danger: #ef4444;
+    --warning: #f59e0b;
+    --bg: #f8fafc;
+    --bg-dark: #18181b;
+    --border: #e5e7eb;
+    --border-dark: #27272a;
+    --card-bg: #ffffff;
+    --card-bg-dark: #23232b;
+    --text: #1f2937;
+    --text-light: #6b7280;
+    --text-muted: #9ca3af;
+    --text-dark: #f3f4f6;
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    --gradient-primary: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+    --gradient-success: linear-gradient(135deg, var(--success) 0%, #34d399 100%);
+}
+[data-theme="dark"] {
+    --bg: var(--bg-dark);
+    --card-bg: var(--card-bg-dark);
+    --border: var(--border-dark);
+    --text: var(--text-dark);
+}
+
 /* Page Header */
 .page-header {
     text-align: center;
@@ -164,6 +194,41 @@
     box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.15);
     outline: none;
     transform: translateY(-2px);
+}
+
+/* Modern Search Box */
+#movie-search.select2-hidden-accessible + .select2-container .select2-selection--single {
+    background: var(--card-bg);
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    min-height: 48px;
+    font-size: 1rem;
+    color: var(--text);
+    box-shadow: var(--shadow-sm);
+    transition: border 0.2s, box-shadow 0.2s;
+}
+#movie-search.select2-hidden-accessible + .select2-container .select2-selection--single:focus,
+#movie-search.select2-hidden-accessible + .select2-container .select2-selection--single:hover {
+    border-color: var(--primary);
+    box-shadow: var(--shadow);
+}
+.select2-dropdown {
+    background: var(--card-bg);
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    box-shadow: var(--shadow);
+}
+.select2-results__option--highlighted {
+    background: var(--primary);
+    color: #fff;
+}
+.select2-search__field {
+    background: var(--bg);
+    color: var(--text);
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    padding: 0.5rem 0.75rem;
 }
 
 /* Search Group */
@@ -1382,4 +1447,4 @@ document.addEventListener('DOMContentLoaded', function() {
 <!-- CSRF Token -->
 {% csrf_token %}
 
-{% endblock %}
+{% endblock %
