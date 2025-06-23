@@ -3,10 +3,11 @@
 {% block title %}Dashboard - OptiChoice{% endblock %}
 
 {% block content %}
-<div style="text-align: center; color: white; margin-bottom: 50px;">    <h1 style="font-size: 2.5rem; margin-bottom: 20px; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">
+<div class="welcome-section">
+    <h1 class="welcome-title">
         Welcome back, {% if user.first_name %}{{ user.first_name }}{% else %}{{ user.username }}{% endif %}!
     </h1>
-    <p style="font-size: 1.1rem; text-shadow: 1px 1px 2px rgba(0,0,0,0.3);">
+    <p class="welcome-subtitle">
         Ready to discover your next favorite content?
     </p>
 </div>
@@ -43,6 +44,36 @@
 </div>
 
 <style>
+.welcome-section {
+    text-align: center;
+    color: rgb(119, 24, 128);
+    margin-bottom: 50px;
+}
+
+.welcome-title {
+    font-size: 2.5rem;
+    margin-bottom: 20px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+}
+
+.welcome-subtitle {
+    font-size: 1.1rem;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+}
+
+/* Dark theme styles for welcome section */
+[data-theme="dark"] .welcome-section {
+    color: #e1bee7; /* Light purple for dark theme */
+}
+
+[data-theme="dark"] .welcome-title {
+    text-shadow: 2px 2px 4px rgba(255,255,255,0.1);
+}
+
+[data-theme="dark"] .welcome-subtitle {
+    text-shadow: 1px 1px 2px rgba(255,255,255,0.1);
+}
+
 .dashboard-container {
     max-width: 1200px;
     margin: 0 auto;

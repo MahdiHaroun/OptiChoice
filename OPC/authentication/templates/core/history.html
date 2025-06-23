@@ -669,19 +669,20 @@ class HistoryManager {
             if (e.target === this.modal) this.closeModal();
         });
     }
-    
-    async loadHistory() {
+      async loadHistory() {
         try {
             this.showLoading();
-            
-            const response = await fetch('/api/movies/history/', {
+              const response = await fetch('/api/movies/history/', {
+                method: 'GET',
                 headers: {
-                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-                }
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCSRFToken()
+                },
+                credentials: 'same-origin'
             });
             
             if (!response.ok) {
-                throw new Error('Failed to load history');
+                throw new Error(`HTTP error! status: ${response.status}`);
             }
             
             const data = await response.json();
@@ -875,24 +876,24 @@ class HistoryManager {
         this.modal.style.display = 'none';
         this.currentHistoryId = null;
     }
-    
-    async deleteHistory(historyId) {
+      async deleteHistory(historyId) {
         if (!confirm('Are you sure you want to delete this recommendation history?')) {
             return;
         }
         
-        try {
-            const response = await fetch('/api/movies/history/delete-single/', {
+        try {            const response = await fetch('/api/movies/history/delete-single/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                    'X-CSRFToken': getCSRFToken()
                 },
+                credentials: 'same-origin',
                 body: JSON.stringify({ history_id: historyId })
             });
             
             if (!response.ok) {
-                throw new Error('Failed to delete history');
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Failed to delete history');
             }
             
             // Remove from local data and re-render
@@ -904,7 +905,7 @@ class HistoryManager {
             
         } catch (error) {
             console.error('Error deleting history:', error);
-            this.showMessage('Failed to delete history item. Please try again.', 'error');
+            this.showMessage(`Failed to delete history item: ${error.message}`, 'error');
         }
     }
     
@@ -914,8 +915,7 @@ class HistoryManager {
             await this.deleteHistory(this.currentHistoryId);
         }
     }
-    
-    async clearAllHistory() {
+      async clearAllHistory() {
         if (!confirm('Are you sure you want to delete ALL your recommendation history? This action cannot be undone.')) {
             return;
         }
@@ -923,29 +923,37 @@ class HistoryManager {
         try {
             const historyIds = this.historyData.map(item => item.id);
             
-            const response = await fetch('/api/movies/history/delete-bulk/', {
+            if (historyIds.length === 0) {
+                this.showMessage('No history to clear.', 'info');
+                return;
+            }
+              const response = await fetch('/api/movies/history/delete-bulk/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                    'X-CSRFToken': getCSRFToken()
                 },
+                credentials: 'same-origin',
                 body: JSON.stringify({ history_ids: historyIds })
             });
             
             if (!response.ok) {
-                throw new Error('Failed to clear history');
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Failed to clear history');
             }
+            
+            const result = await response.json();
             
             this.historyData = [];
             this.filteredData = [];
             this.updateStats();
             this.renderHistory();
             
-            this.showMessage('All history cleared successfully!', 'success');
+            this.showMessage(`All history cleared successfully! (${result.deleted_count || historyIds.length} items removed)`, 'success');
             
         } catch (error) {
             console.error('Error clearing history:', error);
-            this.showMessage('Failed to clear history. Please try again.', 'error');
+            this.showMessage(`Failed to clear history: ${error.message}`, 'error');
         }
     }
     
@@ -1084,18 +1092,55 @@ function getCookie(name) {
     return cookieValue;
 }
 
+// Get CSRF token with fallback methods
+function getCSRFToken() {
+    // Try to get from input element first
+    const csrfInput = document.querySelector('[name=csrfmiddlewaretoken]');
+    if (csrfInput && csrfInput.value) {
+        return csrfInput.value;
+    }
+    
+    // Try to get from cookie
+    const cookieToken = getCookie('csrftoken');
+    if (cookieToken) {
+        return cookieToken;
+    }
+    
+    // Try to get from meta tag
+    const metaToken = document.querySelector('meta[name=csrf-token]');
+    if (metaToken) {
+        return metaToken.getAttribute('content');
+    }
+    
+    console.error('CSRF token not found!');
+    return '';
+}
+
 // Add CSRF token to the page if it doesn't exist
-if (!document.querySelector('[name=csrfmiddlewaretoken]')) {
-    const csrfInput = document.createElement('input');
-    csrfInput.type = 'hidden';
-    csrfInput.name = 'csrfmiddlewaretoken';
-    csrfInput.value = getCookie('csrftoken');
-    document.body.appendChild(csrfInput);
+function ensureCSRFToken() {
+    let csrfInput = document.querySelector('[name=csrfmiddlewaretoken]');
+    
+    if (!csrfInput) {
+        const token = getCookie('csrftoken');
+        if (token) {
+            csrfInput = document.createElement('input');
+            csrfInput.type = 'hidden';
+            csrfInput.name = 'csrfmiddlewaretoken';
+            csrfInput.value = token;
+            document.body.appendChild(csrfInput);
+        }
+    }
+    
+    return csrfInput ? csrfInput.value : '';
 }
 
 // Initialize the history manager when the page loads
 let historyManager;
 document.addEventListener('DOMContentLoaded', function() {
+    // Ensure CSRF token is available
+    ensureCSRFToken();
+    
+    // Initialize history manager
     historyManager = new HistoryManager();
 });
 </script>
