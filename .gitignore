@@ -135,3 +135,5 @@ OPC/movies/joblibs/GenreKnn/genre_index_to_title.joblib
 OPC/movies/joblibs/GenreKnn/genre_knn_model.joblib
 OPC/movies/joblibs/GenreKnn/genre_movies_df.joblib
 OPC/movies/joblibs/GenreKnn/genre_title_to_index.joblib
+OPC/.env.prod
+OPC/.env.production
