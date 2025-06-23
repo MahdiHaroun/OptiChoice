@@ -29,7 +29,7 @@ class CustomLimitOffsetPagination(LimitOffsetPagination):
     """
     Custom offset pagination for search results with enhanced response format
     """
-    default_limit = 10
+    default_limit = 5
     limit_query_param = 'limit'
     offset_query_param = 'offset'
     max_limit = 50

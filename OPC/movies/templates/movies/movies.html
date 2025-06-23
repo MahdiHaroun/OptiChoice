@@ -83,17 +83,18 @@
                 </form>
             </div>
         </div>
-    </div>
-
-    <!-- Loading Section -->
+    </div>    <!-- Loading Section -->
     <div id="loading-section" class="loading-section" style="display: none;">
         <div class="card loading-card">
             <div class="card-body text-center">
                 <div class="loading-spinner">
-                    <div class="spinner-ring"></div>
+                    <div class="progress-container">
+                        <div class="progress-bar"></div>
+                    </div>
+                    <div class="progress-text">Analyzing your preferences...</div>
                 </div>
                 <h4 class="loading-title">Finding Perfect Matches</h4>
-                <p class="loading-text">Analyzing your preferences with AI algorithms...</p>
+                <p class="loading-text">Using AI algorithms to discover movies you'll love...</p>
             </div>
         </div>
     </div>
@@ -139,6 +140,7 @@
 </div>
 
 <style>
+    
 :root {
     --primary: #4f46e5;
     --primary-light: #818cf8;
@@ -487,7 +489,7 @@
     margin-top: 1rem;
 }
 
-/* Enhanced Loading Animation */
+/* Enhanced Loading Animation with Progress Bar */
 .loading-card {
     background: var(--gradient-primary);
     color: white;
@@ -514,36 +516,66 @@
 
 .loading-spinner {
     margin: 1.5rem auto;
-    width: 40px;
-    height: 40px;
+    width: 100%;
+    max-width: 300px;
     position: relative;
 }
 
-.spinner-ring {
-    width: 40px;
-    height: 40px;
-    border: 3px solid rgba(255, 255, 255, 0.2);
-    border-top: 3px solid white;
-    border-radius: 50%;
-    animation: spin 1.2s linear infinite;
+.progress-container {
+    width: 100%;
+    height: 8px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+    overflow: hidden;
+    position: relative;
+    margin: 1rem auto;
+}
+
+.progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, rgba(255,255,255,0.8), white, rgba(255,255,255,0.8));
+    border-radius: 4px;
+    width: 0%;
+    animation: progressLoad 3s ease-in-out infinite;
     position: relative;
 }
 
-.spinner-ring::before {
+.progress-bar::before {
     content: '';
     position: absolute;
-    top: -3px;
-    left: -3px;
-    right: -3px;
-    bottom: -3px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 50%;
-    animation: spin 2s linear infinite reverse;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent);
+    animation: progressShine 1.5s ease-in-out infinite;
 }
 
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+@keyframes progressLoad {
+    0% { width: 0%; }
+    25% { width: 30%; }
+    50% { width: 60%; }
+    75% { width: 85%; }
+    100% { width: 95%; }
+}
+
+@keyframes progressShine {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+.progress-text {
+    font-size: 0.85rem;
+    opacity: 0.9;
+    margin-top: 0.5rem;
+    animation: progressTextCycle 4s ease-in-out infinite;
+}
+
+@keyframes progressTextCycle {
+    0%, 25% { opacity: 0.9; }
+    12.5% { opacity: 1; }
+    75%, 100% { opacity: 0.7; }
+    87.5% { opacity: 1; }
 }
 
 .loading-title {
@@ -1025,7 +1057,7 @@ function setupMovieSearchBox() {
                 // Send the search term and pagination parameters to the server
                 return { 
                     search: params.term,
-                    limit: 10,          // Request up to 10 results
+                    limit: 5,          // Request up to 10 results
                     offset: 0           // Start from the beginning
                 };
             },
