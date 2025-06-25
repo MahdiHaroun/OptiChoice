@@ -18,12 +18,13 @@
             <h3>🎬 Movies</h3>
             <p>Discover new movies based on your preferences using our advanced AI recommendation models.</p>
             <a href="{% url 'movie_recommendation_page' %}" class="btn btn-secondary">Start Exploring</a>
+            <a href="{% url 'recommendation_history_page' %}" class="btn btn-secondary">Watch List</a>
         </div>
-        
-        <div class="card card-books">
+          <div class="card card-books">
             <h3>📚 Books</h3>
             <p>Find your next great read with personalized book recommendations tailored to your interests.</p>
-            <a href="#" class="btn btn-secondary">Soon </a>
+            <a href="{% url 'books:book_recommendation_page' %}" class="btn btn-secondary">Start Reading</a>
+            <a href="{% url 'books:book_history_page' %}" class="btn btn-secondary">Reading List</a>
         </div>
         
         <div class="card card-courses">
@@ -147,6 +148,14 @@
     transition: all 0.3s ease;
     border: none;
     cursor: pointer;
+    opacity: 0;
+    transform: translateY(10px);
+    margin-bottom: 5px;
+}
+
+.card:hover .btn {
+    opacity: 1;
+    transform: translateY(0);
 }
 
 .btn-primary {

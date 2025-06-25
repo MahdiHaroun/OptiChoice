@@ -1,0 +1,1234 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block content %}
+<style>
+:root {
+    --primary: #6366f1;
+    --primary-light: #a5b4fc;
+    --primary-dark: #3730a3;
+    --success: #22c55e;
+    --danger: #ef4444;
+    --warning: #f59e0b;
+    --bg: #f8fafc;
+    --bg-dark: #18181b;
+    --border: #e5e7eb;
+    --border-dark: #232336;
+    --card-bg: #ffffff;
+    --card-bg-dark: #232336;
+    --text: #1f2937;
+    --text-light: #6b7280;
+    --text-muted: #9ca3af;
+    --text-dark: #f3f4f6;
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.18), 0 1px 2px -1px rgb(0 0 0 / 0.18);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.18), 0 4px 6px -4px rgb(0 0 0 / 0.18);
+    --gradient-primary: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+    --gradient-success: linear-gradient(135deg, var(--success) 0%, #34d399 100%);
+    --card-hover-dark: #282a36;
+    --btn-hover-dark: #3b3e5a;
+    --input-hover-dark: #23234a;
+    --primary-hover-dark: #818cf8;
+}
+[data-theme="dark"] {
+    --bg: #18181b;
+    --card-bg: var(--card-bg-dark);
+    --border: var(--border-dark);
+    --text: var(--text-dark);
+}
+
+/* Dark theme card hover */
+[data-theme="dark"] .card:hover,
+[data-theme="dark"] .input-card:hover,
+[data-theme="dark"] .results-card:hover {
+    background: var(--card-hover-dark);
+    box-shadow: 0 4px 24px 0 rgba(129,140,248,0.10);
+    border-color: var(--primary-hover-dark);
+}
+
+/* Dark theme button hover */
+[data-theme="dark"] .btn-primary:hover,
+[data-theme="dark"] .btn-outline-primary:hover {
+    background: var(--primary-hover-dark);
+    color: #fff;
+    border-color: var(--primary-hover-dark);
+    box-shadow: 0 2px 12px 0 rgba(129,140,248,0.18);
+}
+[data-theme="dark"] .btn-secondary:hover {
+    background: var(--btn-hover-dark);
+    color: #fff;
+}
+[data-theme="dark"] .btn-success:hover {
+    background: linear-gradient(135deg, #34d399 0%, #059669 100%);
+    color: #fff;
+}
+
+/* Dark theme input hover/focus */
+[data-theme="dark"] .form-control:focus,
+[data-theme="dark"] .form-control:hover,
+[data-theme="dark"] .book-search-input:focus,
+[data-theme="dark"] .book-search-input:hover {
+    border-color: var(--primary-hover-dark);
+    background: var(--input-hover-dark);
+    color: #fff;
+    box-shadow: 0 0 0 2px var(--primary-hover-dark);
+}
+[data-theme="dark"] .form-control,
+[data-theme="dark"] .book-search-input {
+    background: var(--card-hover-dark);
+    color: #fff;
+    border-color: var(--border-dark);
+}
+
+/* Page Header */
+.page-header {
+    text-align: center;
+    margin-bottom: 2rem;
+    padding: 1.5rem 1rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 0 0 20px 20px;
+}
+
+.header-content {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.page-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #ffffff;
+    text-shadow: 2px 2px 8px rgba(0,0,0,0.3);
+    margin-bottom: 0.75rem;
+}
+
+.page-subtitle {
+    font-size: 1.2rem;
+    color: rgba(255, 255, 255, 0.95);
+    text-shadow: 1px 1px 4px rgba(0,0,0,0.2);
+    margin: 0;
+    line-height: 1.5;
+}
+
+/* Navigation Section */
+.navigation-section {
+    margin-bottom: 2rem;
+    padding: 0 1rem;
+}
+
+.nav-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: center;
+}
+
+.nav-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.nav-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    color: white;
+    text-decoration: none;
+}
+
+.nav-button i {
+    font-size: 1.1rem;
+}
+
+/* Container */
+.books-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 2rem 2rem 2rem;
+    background: none; /* Remove background to eliminate black box */
+    min-height: 100vh;
+}
+[data-theme="dark"] .books-container {
+    background: none; /* Remove background in dark mode as well */
+}
+
+/* Cards */
+.card {
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid rgba(102, 126, 234, 0.1);
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(102, 126, 234, 0.15);
+    backdrop-filter: blur(20px);
+    margin-bottom: 2rem;
+    overflow: hidden;
+    transition: all 0.4s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 60px rgba(102, 126, 234, 0.25);
+    border-color: rgba(102, 126, 234, 0.3);
+}
+
+[data-theme="dark"] .card {
+    background: rgba(45, 55, 72, 0.95);
+    border-color: rgba(102, 126, 234, 0.2);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+}
+
+/* Card Headers */
+.card-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 1.5rem 2rem;
+    border-bottom: none;
+    margin: 0;
+}
+
+.card-header h3 {
+    margin: 0;
+    font-size: 1.4rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.card-header i {
+    font-size: 1.3rem;
+}
+
+/* Form Styling */
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 0.5rem;
+    font-size: 0.95rem;
+}
+
+.form-control {
+    width: 100%;
+    padding: 0.875rem 1rem;
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    background: var(--card-bg);
+    color: var(--text);
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.book-search-input {
+    width: 100%;
+    padding: 0.875rem 1rem;
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    background: var(--card-bg);
+    color: var(--text);
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.book-search-input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.form-text {
+    font-size: 0.85rem;
+    color: var(--text-light);
+    margin-top: 0.25rem;
+}
+
+/* Form Row */
+.form-row {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 1.5rem;
+}
+
+@media (max-width: 768px) {
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Button Group */
+.button-group {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    margin-top: 1.5rem;
+}
+
+/* Buttons */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.875rem 1.5rem;
+    border: none;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+}
+
+.btn-primary {
+    background: var(--gradient-primary);
+    color: white;
+    box-shadow: var(--shadow);
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+
+.btn-secondary {
+    background: #6c757d;
+    color: white;
+    box-shadow: var(--shadow);
+}
+
+.btn-secondary:hover {
+    background: #5a6268;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+
+.btn-outline-primary {
+    background: transparent;
+    color: var(--primary);
+    border: 2px solid var(--primary);
+}
+
+.btn-outline-primary:hover {
+    background: var(--primary);
+    color: white;
+}
+
+.btn-success {
+    background: var(--gradient-success);
+    color: white;
+    box-shadow: var(--shadow);
+}
+
+.btn-success:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+
+/* Genre Selection */
+.genre-selection {
+    background: var(--card-bg);
+    border-radius: 16px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: var(--shadow);
+}
+
+.genre-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.genre-option {
+    background: rgba(99, 102, 241, 0.05);
+    border: 2px solid rgba(99, 102, 241, 0.1);
+    border-radius: 12px;
+    padding: 1rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.genre-option:hover {
+    background: rgba(99, 102, 241, 0.1);
+    border-color: rgba(99, 102, 241, 0.3);
+    transform: translateY(-2px);
+}
+
+.genre-option.selected {
+    background: var(--gradient-primary);
+    color: white;
+    border-color: var(--primary);
+}
+
+.genre-emoji {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+.genre-name {
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+/* Loading Animation */
+.loading-section {
+    display: none;
+    background: var(--card-bg);
+    border-radius: 16px;
+    padding: 3rem 2rem;
+    text-align: center;
+    margin-bottom: 2rem;
+    box-shadow: var(--shadow);
+}
+
+.loading-card {
+    border: none;
+    background: transparent;
+    box-shadow: none;
+}
+
+.loading-spinner {
+    margin-bottom: 1.5rem;
+}
+
+.progress-container {
+    width: 200px;
+    height: 6px;
+    background: rgba(99, 102, 241, 0.1);
+    border-radius: 3px;
+    margin: 0 auto 1rem;
+    overflow: hidden;
+}
+
+.progress-bar {
+    height: 100%;
+    background: var(--gradient-primary);
+    border-radius: 3px;
+    animation: progress 2s ease-in-out infinite;
+}
+
+@keyframes progress {
+    0% { width: 0%; }
+    50% { width: 70%; }
+    100% { width: 100%; }
+}
+
+.progress-text {
+    color: var(--text-light);
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+}
+
+.loading-title {
+    color: var(--text);
+    margin-bottom: 0.5rem;
+}
+
+.loading-text {
+    color: var(--text-light);
+}
+
+/* Results Section */
+.results-section {
+    display: none;
+}
+
+.results-card {
+    border: none;
+    background: var(--card-bg);
+    box-shadow: var(--shadow);
+}
+
+.results-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 1.5rem 2rem;
+    border-radius: 16px 16px 0 0;
+}
+
+.results-title h3 {
+    margin: 0;
+    font-size: 1.4rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.recommendation-info {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+}
+
+.results-actions {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+/* Book Cards Grid */
+.recommendations-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+    padding: 2rem;
+}
+
+.book-card {
+    background: var(--card-bg);
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    position: relative;
+}
+
+.book-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+    border-color: var(--primary);
+}
+
+.book-card.selected {
+    border-color: var(--success);
+    box-shadow: 0 8px 25px rgba(34, 197, 94, 0.2);
+}
+
+.book-cover {
+    height: 200px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 3rem;
+    position: relative;
+}
+
+.book-info {
+    padding: 1.5rem;
+}
+
+.book-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 0.5rem;
+    line-height: 1.3;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.book-author {
+    color: var(--text-light);
+    font-size: 0.9rem;
+    margin-bottom: 0.75rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.book-description {
+    color: var(--text-light);
+    font-size: 0.85rem;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    margin-bottom: 1rem;
+}
+
+.book-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.book-select-checkbox {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 24px;
+    height: 24px;
+    border: 2px solid white;
+    border-radius: 6px;
+    background: rgba(0, 0, 0, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.book-select-checkbox.checked {
+    background: var(--success);
+    border-color: var(--success);
+}
+
+.book-select-checkbox i {
+    font-size: 0.8rem;
+}
+
+/* Error Section */
+.error-section {
+    display: none;
+    background: var(--card-bg);
+    border-radius: 16px;
+    padding: 3rem 2rem;
+    text-align: center;
+    margin-bottom: 2rem;
+    box-shadow: var(--shadow);
+}
+
+.error-card {
+    border: none;
+    background: transparent;
+    box-shadow: none;
+}
+
+.error-icon {
+    font-size: 4rem;
+    color: var(--danger);
+    margin-bottom: 1rem;
+}
+
+.error-title {
+    color: var(--text);
+    margin-bottom: 1rem;
+}
+
+.error-message {
+    color: var(--text-light);
+    margin-bottom: 1.5rem;
+}
+
+/* Responsive Design */
+@media (max-width: 992px) {
+    .books-container {
+        padding: 0 1rem 2rem 1rem;
+    }
+    
+    .recommendations-grid {
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 1rem;
+        padding: 1.5rem;
+    }
+    
+    .results-header {
+        flex-direction: column;
+        align-items: stretch;
+        text-align: center;
+    }
+    
+    .results-actions {
+        justify-content: center;
+    }
+}
+
+@media (max-width: 768px) {
+    .page-title {
+        font-size: 2rem;
+    }
+    
+    .page-subtitle {
+        font-size: 1rem;
+    }
+    
+    .card-header {
+        padding: 1rem 1.5rem;
+    }
+    
+    .card-header h3 {
+        font-size: 1.2rem;
+    }
+    
+    .recommendations-grid {
+        grid-template-columns: 1fr;
+        padding: 1rem;
+    }
+    
+    .genre-grid {
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    }
+    
+    .button-group {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .btn {
+        justify-content: center;
+    }
+}
+
+/* Success Message */
+.success-message {
+    background: #d4edda;
+    color: #155724;
+    padding: 1rem 1.5rem;
+    border-radius: 10px;
+    margin-bottom: 1.5rem;
+    border: 1px solid #c3e6cb;
+    display: none;
+}
+
+[data-theme="dark"] .success-message {
+    background: #1a4c37;
+    color: #9ae6b4;
+    border-color: #2d7748;
+}
+
+/* Dark theme adjustments for book cards */
+[data-theme="dark"] .book-card {
+    background: var(--card-bg-dark);
+    border-color: var(--border-dark);
+}
+
+[data-theme="dark"] .book-card:hover {
+    background: var(--card-hover-dark);
+    border-color: var(--primary-hover-dark);
+}
+
+[data-theme="dark"] .book-title {
+    color: var(--text-dark);
+}
+
+[data-theme="dark"] .book-author,
+[data-theme="dark"] .book-description {
+    color: #a0aec0;
+}
+
+[data-theme="dark"] .genre-option {
+    background: rgba(129, 140, 248, 0.1);
+    border-color: rgba(129, 140, 248, 0.2);
+}
+
+[data-theme="dark"] .genre-option:hover {
+    background: rgba(129, 140, 248, 0.2);
+    border-color: rgba(129, 140, 248, 0.4);
+}
+</style>
+
+<!-- Shared Header -->
+<div class="page-header">
+    <div class="header-content">
+        <h1 class="page-title">📚 Genre-Based Book Recommendations</h1>
+        <p class="page-subtitle">Discover books tailored to your favorite genres</p>
+    </div>
+</div>
+
+<!-- Navigation -->
+<div class="navigation-section">
+    <div class="nav-container">
+        <a href="{% url 'books:book_recommendation_page' %}" class="nav-button">
+            <i class="fas fa-arrow-left"></i>
+            Back to Book Recommendations
+        </a>
+    </div>
+</div>
+
+<div class="books-container">
+    <!-- Genre Selection Card -->
+    <div class="card input-card">
+        <div class="card-header">
+            <h3><i class="fas fa-tags"></i> Select Your Favorite Genres</h3>
+        </div>
+        <div class="card-body">
+            <div class="genre-selection">
+                <p style="margin-bottom: 1rem; color: var(--text-light);">Choose one or more genres that interest you:</p>
+                <div class="genre-grid" id="genre-grid">
+                    <!-- Genres will be populated here -->
+                </div>
+            </div>
+            
+            <form id="genre-recommendation-form">
+                {% csrf_token %}
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="model-select" class="form-label"><i class="fas fa-robot"></i> AI Model:</label>
+                        <select id="model-select" class="form-control">
+                            <option value="Embeddings">Embeddings</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="num-recommendations" class="form-label"><i class="fas fa-list-ol"></i> Number:</label>
+                        <select id="num-recommendations" class="form-control">
+                            <option value="5" selected>5</option>
+                            <option value="10">10</option>
+                            <option value="15">15</option>
+                            <option value="20">20</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="button-group">
+                    <button type="submit" class="btn btn-primary btn-recommend" disabled>
+                        <i class="fas fa-magic"></i> Get Recommendations
+                    </button>
+                    <button type="button" id="regenerate-btn" class="btn btn-secondary btn-regenerate" style="display: none;">
+                        <i class="fas fa-sync-alt"></i> Regenerate
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Loading Section -->
+    <div id="loading-section" class="loading-section">
+        <div class="card loading-card">
+            <div class="card-body text-center">
+                <div class="loading-spinner">
+                    <div class="progress-container"><div class="progress-bar"></div></div>
+                    <div class="progress-text">Analyzing your genre preferences...</div>
+                </div>
+                <h4 class="loading-title">Finding Perfect Matches</h4>
+                <p class="loading-text">Our AI is discovering books you'll love based on your selected genres...</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Results Section -->
+    <div id="results-section" class="results-section">
+        <div class="card results-card">
+            <div class="card-header results-header">
+                <div class="results-title">
+                    <h3><i class="fas fa-stars"></i> Your Book Recommendations</h3>
+                    <div id="recommendation-info" class="recommendation-info"></div>
+                </div>
+                <div class="results-actions">
+                    <button id="select-all-btn" class="btn btn-outline-primary">
+                        <i class="fas fa-check-double"></i> Select All
+                    </button>
+                    <button id="save-selected-btn" class="btn btn-success" style="display: none;">
+                        <i class="fas fa-save"></i> Save (<span id="selected-count">0</span>)
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div id="success-message" class="success-message">
+                    <i class="fas fa-check-circle"></i> Recommendations saved successfully!
+                </div>
+                <div id="recommendations-grid" class="recommendations-grid"></div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Error Section -->
+    <div id="error-section" class="error-section">
+        <div class="card error-card">
+            <div class="card-body text-center">
+                <i class="fas fa-exclamation-triangle error-icon"></i>
+                <h4 class="error-title">Something went wrong</h4>
+                <p id="error-message" class="error-message"></p>
+                <button onclick="resetForm()" class="btn btn-primary">
+                    <i class="fas fa-redo"></i> Try Again
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Genre data
+const genres = [
+    { name: 'Fiction', emoji: '📖' },
+    { name: 'Non-Fiction', emoji: '📚' },
+    { name: 'Science Fiction', emoji: '🚀' },
+    { name: 'Fantasy', emoji: '🧙‍♂️' },
+    { name: 'Mystery', emoji: '🔍' },
+    { name: 'Romance', emoji: '💕' },
+    { name: 'Thriller', emoji: '😨' },
+    { name: 'Horror', emoji: '👻' },
+    { name: 'Biography', emoji: '👤' },
+    { name: 'History', emoji: '🏛️' },
+    { name: 'Science', emoji: '🔬' },
+    { name: 'Philosophy', emoji: '🤔' },
+    { name: 'Poetry', emoji: '✨' },
+    { name: 'Drama', emoji: '🎭' },
+    { name: 'Adventure', emoji: '🗺️' },
+    { name: 'Business', emoji: '💼' },
+    { name: 'Health', emoji: '🏥' },
+    { name: 'Self-Help', emoji: '💪' },
+    { name: 'Travel', emoji: '✈️' },
+    { name: 'Cooking', emoji: '👩‍🍳' }
+];
+
+let selectedGenres = new Set();
+let recommendationData = null;
+let selectedBooks = new Set();
+
+// Initialize the page
+document.addEventListener('DOMContentLoaded', function() {
+    renderGenres();
+    initializeEventListeners();
+});
+
+function renderGenres() {
+    const genreGrid = document.getElementById('genre-grid');
+    genreGrid.innerHTML = '';
+    
+    genres.forEach(genre => {
+        const genreElement = document.createElement('div');
+        genreElement.className = 'genre-option';
+        genreElement.innerHTML = `
+            <span class="genre-emoji">${genre.emoji}</span>
+            <span class="genre-name">${genre.name}</span>
+        `;
+        
+        genreElement.addEventListener('click', () => {
+            toggleGenre(genre.name, genreElement);
+        });
+        
+        genreGrid.appendChild(genreElement);
+    });
+}
+
+function toggleGenre(genreName, element) {
+    if (selectedGenres.has(genreName)) {
+        selectedGenres.delete(genreName);
+        element.classList.remove('selected');
+    } else {
+        selectedGenres.add(genreName);
+        element.classList.add('selected');
+    }
+    
+    updateRecommendButton();
+}
+
+function updateRecommendButton() {
+    const recommendBtn = document.querySelector('.btn-recommend');
+    recommendBtn.disabled = selectedGenres.size === 0;
+}
+
+function initializeEventListeners() {
+    const form = document.getElementById('genre-recommendation-form');
+    const regenerateBtn = document.getElementById('regenerate-btn');
+    const selectAllBtn = document.getElementById('select-all-btn');
+    const saveSelectedBtn = document.getElementById('save-selected-btn');
+    
+    form.addEventListener('submit', handleFormSubmit);
+    regenerateBtn.addEventListener('click', handleRegenerate);
+    selectAllBtn.addEventListener('click', handleSelectAll);
+    saveSelectedBtn.addEventListener('click', handleSaveSelected);
+}
+
+async function handleFormSubmit(e) {
+    e.preventDefault();
+    
+    if (selectedGenres.size === 0) {
+        showError('Please select at least one genre.');
+        return;
+    }
+    
+    const modelUsed = document.getElementById('model-select').value;
+    const numRecommendations = parseInt(document.getElementById('num-recommendations').value);
+    
+    showLoading();
+    
+    try {
+        const response = await fetch('/api/books/genre-recommendations/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCSRFToken()
+            },
+            body: JSON.stringify({
+                genres: Array.from(selectedGenres),
+                model: modelUsed,
+                num_recommendations: numRecommendations
+            })
+        });
+        
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Failed to get recommendations');
+        }
+        
+        const data = await response.json();
+        recommendationData = data;
+        
+        hideLoading();
+        showResults(data);
+        
+    } catch (error) {
+        console.error('Error:', error);
+        hideLoading();
+        showError(error.message || 'Failed to get recommendations. Please try again.');
+    }
+}
+
+function handleRegenerate() {
+    const form = document.getElementById('genre-recommendation-form');
+    handleFormSubmit({ preventDefault: () => {} });
+}
+
+function showLoading() {
+    document.getElementById('loading-section').style.display = 'block';
+    document.getElementById('results-section').style.display = 'none';
+    document.getElementById('error-section').style.display = 'none';
+}
+
+function hideLoading() {
+    document.getElementById('loading-section').style.display = 'none';
+}
+
+function showResults(data) {
+    document.getElementById('results-section').style.display = 'block';
+    document.getElementById('error-section').style.display = 'none';
+    document.getElementById('regenerate-btn').style.display = 'inline-flex';
+    
+    const recommendationInfo = document.getElementById('recommendation-info');
+    recommendationInfo.textContent = `Based on genres: ${Array.from(selectedGenres).join(', ')} • Model: ${data.model_used}`;
+    
+    renderRecommendations(data.recommendations);
+    selectedBooks.clear();
+    updateSaveButton();
+}
+
+function renderRecommendations(recommendations) {
+    const grid = document.getElementById('recommendations-grid');
+    grid.innerHTML = '';
+    
+    recommendations.forEach((book, index) => {
+        const bookCard = createBookCard(book, index);
+        grid.appendChild(bookCard);
+    });
+}
+
+function createBookCard(book, index) {
+    const card = document.createElement('div');
+    card.className = 'book-card';
+    card.dataset.bookIndex = index;
+    
+    card.innerHTML = `
+        <div class="book-cover">
+            <div class="book-select-checkbox" onclick="toggleBookSelection(${index}, event)">
+                <i class="fas fa-check" style="display: none;"></i>
+            </div>
+            📚
+        </div>
+        <div class="book-info">
+            <h4 class="book-title">${book.title}</h4>
+            <p class="book-author">by ${book.author || 'Unknown Author'}</p>
+            ${book.description ? `<p class="book-description">${book.description}</p>` : ''}
+        </div>
+    `;
+    
+    card.addEventListener('click', (e) => {
+        if (!e.target.closest('.book-select-checkbox')) {
+            toggleBookSelection(index);
+        }
+    });
+    
+    return card;
+}
+
+function toggleBookSelection(index, event) {
+    if (event) {
+        event.stopPropagation();
+    }
+    
+    const card = document.querySelector(`[data-book-index="${index}"]`);
+    const checkbox = card.querySelector('.book-select-checkbox');
+    const checkIcon = checkbox.querySelector('i');
+    
+    if (selectedBooks.has(index)) {
+        selectedBooks.delete(index);
+        card.classList.remove('selected');
+        checkbox.classList.remove('checked');
+        checkIcon.style.display = 'none';
+    } else {
+        selectedBooks.add(index);
+        card.classList.add('selected');
+        checkbox.classList.add('checked');
+        checkIcon.style.display = 'block';
+    }
+    
+    updateSaveButton();
+}
+
+function handleSelectAll() {
+    const recommendations = recommendationData.recommendations;
+    const allSelected = selectedBooks.size === recommendations.length;
+    
+    if (allSelected) {
+        // Deselect all
+        selectedBooks.clear();
+        document.querySelectorAll('.book-card').forEach(card => {
+            card.classList.remove('selected');
+            const checkbox = card.querySelector('.book-select-checkbox');
+            checkbox.classList.remove('checked');
+            checkbox.querySelector('i').style.display = 'none';
+        });
+        document.getElementById('select-all-btn').innerHTML = '<i class="fas fa-check-double"></i> Select All';
+    } else {
+        // Select all
+        recommendations.forEach((_, index) => {
+            selectedBooks.add(index);
+            const card = document.querySelector(`[data-book-index="${index}"]`);
+            card.classList.add('selected');
+            const checkbox = card.querySelector('.book-select-checkbox');
+            checkbox.classList.add('checked');
+            checkbox.querySelector('i').style.display = 'block';
+        });
+        document.getElementById('select-all-btn').innerHTML = '<i class="fas fa-times"></i> Deselect All';
+    }
+    
+    updateSaveButton();
+}
+
+function updateSaveButton() {
+    const saveBtn = document.getElementById('save-selected-btn');
+    const selectAllBtn = document.getElementById('select-all-btn');
+    const count = selectedBooks.size;
+    
+    if (count > 0) {
+        saveBtn.style.display = 'inline-flex';
+        document.getElementById('selected-count').textContent = count;
+    } else {
+        saveBtn.style.display = 'none';
+    }
+    
+    // Update select all button text
+    if (recommendationData && count === recommendationData.recommendations.length) {
+        selectAllBtn.innerHTML = '<i class="fas fa-times"></i> Deselect All';
+    } else {
+        selectAllBtn.innerHTML = '<i class="fas fa-check-double"></i> Select All';
+    }
+}
+
+async function handleSaveSelected() {
+    if (selectedBooks.size === 0) {
+        showError('Please select at least one book to save.');
+        return;
+    }
+    
+    const selectedBookData = Array.from(selectedBooks).map(index => 
+        recommendationData.recommendations[index]
+    );
+    
+    try {
+        const response = await fetch('/api/books/save-recommendations/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCSRFToken()
+            },
+            body: JSON.stringify({
+                recommendations: selectedBookData,
+                model_used: recommendationData.model_used,
+                genres: Array.from(selectedGenres)
+            })
+        });
+        
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Failed to save recommendations');
+        }
+        
+        // Show success message
+        const successMessage = document.getElementById('success-message');
+        successMessage.style.display = 'block';
+        
+        // Hide success message after 5 seconds
+        setTimeout(() => {
+            successMessage.style.display = 'none';
+        }, 5000);
+        
+        // Reset selections
+        selectedBooks.clear();
+        document.querySelectorAll('.book-card').forEach(card => {
+            card.classList.remove('selected');
+            const checkbox = card.querySelector('.book-select-checkbox');
+            checkbox.classList.remove('checked');
+            checkbox.querySelector('i').style.display = 'none';
+        });
+        updateSaveButton();
+        
+    } catch (error) {
+        console.error('Error saving recommendations:', error);
+        showError(error.message || 'Failed to save recommendations. Please try again.');
+    }
+}
+
+function showError(message) {
+    document.getElementById('error-message').textContent = message;
+    document.getElementById('error-section').style.display = 'block';
+    document.getElementById('results-section').style.display = 'none';
+    document.getElementById('loading-section').style.display = 'none';
+}
+
+function resetForm() {
+    document.getElementById('error-section').style.display = 'none';
+    document.getElementById('results-section').style.display = 'none';
+    document.getElementById('regenerate-btn').style.display = 'none';
+    selectedBooks.clear();
+    selectedGenres.clear();
+    
+    // Reset genre selections
+    document.querySelectorAll('.genre-option').forEach(option => {
+        option.classList.remove('selected');
+    });
+    
+    updateRecommendButton();
+}
+
+// CSRF Token utility
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+function getCSRFToken() {
+    return getCookie('csrftoken') || document.querySelector('[name=csrfmiddlewaretoken]')?.value || '';
+}
+</script>
+
+{% endblock %}

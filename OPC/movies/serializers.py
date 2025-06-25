@@ -71,7 +71,7 @@ class MovieRecommendationUserRatingSerializer(serializers.Serializer):
 class RecommendationHistorySerializer(serializers.ModelSerializer): 
     class Meta: 
         model = RecommendationHistory
-        fields = [ 'user', 'input_title', 'recommended_titles', 'model_used', 'timestamp']
+        fields = ['id', 'user', 'input_title', 'recommended_titles', 'model_used', 'timestamp']
         
 
 

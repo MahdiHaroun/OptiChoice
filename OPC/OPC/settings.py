@@ -72,6 +72,7 @@ INSTALLED_APPS = [
     # Local apps
     'authentication',
     'movies',
+    'books',
 ]
 
 MIDDLEWARE = [

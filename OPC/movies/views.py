@@ -3,8 +3,10 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import  status
 from rest_framework.pagination import PageNumberPagination, LimitOffsetPagination
+from rest_framework.decorators import api_view, permission_classes
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
+from django.utils.decorators import method_decorator
 from django.db import models
 
 
@@ -212,26 +214,33 @@ class SaveSelectedRecommendations(APIView):
 
 
 class MovieHistoryView(generics.ListAPIView):
-    queryset = RecommendationHistory.objects.all()
     serializer_class = RecommendationHistorySerializer
+    permission_classes = [IsAuthenticated]
     search_fields = ['input_title', 'model_used']
     ordering_fields = ['timestamp']
+    ordering = ['-timestamp']  
+
+    def get_queryset(self):
+        """Return history entries for the authenticated user only"""
+        return RecommendationHistory.objects.filter(user=self.request.user)
 
 
 
 class MovieHistorySingleClearView(APIView):
-    def post(self, request):
+    permission_classes = [IsAuthenticated]
+    
+    def post(self, request, *args, **kwargs):
         """Delete a single recommendation history entry"""
-        history_id = request.data.get('history_id')
-        
-        if not history_id:
-            return Response({'error': 'History ID is required.'}, status=status.HTTP_400_BAD_REQUEST)
-        
         try:
-            # Get the history entry
+            history_id = request.data.get('history_id')
+            
+            if not history_id:
+                return Response({'error': 'History ID is required.'}, status=status.HTTP_400_BAD_REQUEST)
+            
+            # Get the history entry for the authenticated user
             history_entry = RecommendationHistory.objects.get(
                 id=history_id,
-                user=request.user if request.user.is_authenticated else None
+                user=request.user
             )
             
             # Delete the entry
@@ -241,32 +250,29 @@ class MovieHistorySingleClearView(APIView):
             
         except RecommendationHistory.DoesNotExist:
             return Response({'error': 'History entry not found.'}, status=status.HTTP_404_NOT_FOUND)
+        except ValueError:
+            return Response({'error': 'Invalid history ID format.'}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-class MovieHistoryBulkClearView(APIView):
-    def post(self, request):
-        """Delete multiple recommendation history entries"""
-        history_ids = request.data.get('history_ids', [])
-        
-        if not history_ids:
-            return Response({'error': 'At least one history ID is required.'}, status=status.HTTP_400_BAD_REQUEST)
-        
+class MovieHistoryBulkClearView(generics.DestroyAPIView):
+    queryset = RecommendationHistory.objects.all()
+    serializer_class = RecommendationHistorySerializer
+    permission_classes = [IsAuthenticated]
+    
+    def delete(self, request, *args, **kwargs):
+        """Delete all recommendation history entries for the authenticated user"""
         try:
-            # Delete the entries
-            deleted_count = RecommendationHistory.objects.filter(
-                id__in=history_ids,
-                user=request.user if request.user.is_authenticated else None
-            ).delete()[0]
-            
+            # Filter by user and delete all entries
+            deleted_count, _ = RecommendationHistory.objects.filter(user=request.user).delete()
             return Response({
-                'status': f'{deleted_count} history entries deleted successfully.',
+                'status': 'All history entries deleted successfully.',
                 'deleted_count': deleted_count
             }, status=status.HTTP_200_OK)
-            
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+       
     
 @login_required
 def movie_recommendation_page(request):
@@ -281,4 +287,4 @@ def genre_recommendation_page(request):
 @login_required
 def recommendation_history_page(request):
     """Render the recommendation history page"""
-    return render(request, 'core/history.html')
+    return render(request, 'movies/movies_history.html')
