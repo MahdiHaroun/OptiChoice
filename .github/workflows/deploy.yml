@@ -1,0 +1,106 @@
+name: Deploy to Digital Ocean
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+        
+    - name: Deploy to Digital Ocean
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.DO_HOST }}
+        username: ${{ secrets.DO_USERNAME }}
+        password: ${{ secrets.DO_PASSWORD }}
+        script: |
+          # Navigate to app directory (create if doesn't exist)
+          mkdir -p /app/optichoice
+          cd /app/optichoice
+          
+          # Clone or pull latest code
+          if [ ! -d ".git" ]; then
+            git clone https://github.com/YOUR_USERNAME/YOUR_REPO.git .
+          else
+            git pull origin main
+          fi
+          
+          # Navigate to Django project directory
+          cd OPC
+          
+          # Stop existing container if running
+          docker-compose -f docker-compose.prod.yml down || true
+          
+          # Create production environment file
+          cat > .env.prod << 'EOF'
+          # Django Settings
+          SECRET_KEY=django-insecure-nrwvf&1*5e0h$^%zy9&1uajyym2%wh*=!%i14u%%v!2ed4v1_)
+          DEBUG=False
+          ALLOWED_HOSTS=134.122.70.184,optichoice.com,www.optichoice.com
+          
+          # Database Settings (for SQLite, no credentials needed, but ready for PostgreSQL/MySQL)
+          DB_ENGINE=django.db.backends.sqlite3
+          DB_NAME=db.sqlite3
+          DB_USER=
+          DB_PASSWORD=
+          DB_HOST=
+          DB_PORT=
+          
+          # Email Settings
+          EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend
+          EMAIL_HOST=smtp.gmail.com
+          EMAIL_PORT=587
+          EMAIL_USE_TLS=True
+          EMAIL_HOST_USER=mahdiharoun44@gmail.com
+          EMAIL_HOST_PASSWORD=ukpb cfzn eeky tnzo
+          DEFAULT_FROM_EMAIL=OptiChoice <mahdiharoun44@gmail.com>
+          
+          # CORS Settings (for React frontend)
+          CORS_ALLOWED_ORIGINS=http://134.122.70.184:3000,https://optichoice.com,https://www.optichoice.com
+          CORS_ALLOW_CREDENTIALS=True
+          CORS_ALLOW_ALL_ORIGINS=False
+          
+          # JWT Settings
+          JWT_ACCESS_TOKEN_LIFETIME_MINUTES=60
+          JWT_REFRESH_TOKEN_LIFETIME_DAYS=1
+          JWT_ALGORITHM=HS256
+          
+          # Security Settings
+          SESSION_COOKIE_AGE=1209600
+          EOF
+          
+          # Create docker-compose.prod.yml
+          cat > docker-compose.prod.yml << 'EOF'
+          version: '3.8'
+          
+          services:
+            web:
+              build: .
+              command: ./entrypoint.sh
+              volumes:
+                - ./db.sqlite3:/app/db.sqlite3
+                - ./static:/app/static
+                - ./media:/app/media
+              ports:
+                - "8000:8000"
+              env_file:
+                - .env.prod
+              restart: always
+              environment:
+                - PYTHONUNBUFFERED=1
+                - DEBUG=False
+                - ALLOWED_HOSTS=134.122.70.184,optichoice.com,www.optichoice.com
+          EOF
+          
+          # Start the application
+          docker-compose -f docker-compose.prod.yml up -d
+          
+          # Clean up old images
+          docker image prune -f
