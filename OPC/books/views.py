@@ -15,6 +15,8 @@ from rest_framework import filters
 from .serializers import BookRecommendationRequestSerializer, BookRecommendationHistorySerializer , BookSerializer 
 from .models import Book, BookRecommendationHistory 
 from .ai_models.Embeddings import recommend_books_embeddings
+from .ai_models.KNN import recommend_books_knn
+from .ai_models.NN import recommend_books_nn
 
 
 class CustomLimitOffsetPagination(LimitOffsetPagination):
@@ -67,6 +69,10 @@ class BookRecommendationView(APIView):
         
             if model_used == 'Embeddings':
                 results = recommend_books_embeddings(book_titles, num_recommendations)
+            elif model_used == 'knn':
+                results = recommend_books_knn(book_titles, num_recommendations)
+            elif model_used == 'NN':
+                results = recommend_books_nn(book_titles, num_recommendations)
             else:
                 return Response(
                     {"error": f"Model '{model_used}' is not supported."},

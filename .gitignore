@@ -142,3 +142,13 @@ OPC/books/joblibs/Embeddings/books_emb.pkl
 OPC/.env.prod
 OPC/.env.production
 >>>>>>> a8701bbc210517a7dba4640a849469784513aa4a
+OPC/books/joblibs/KNN-TF/nn_model.joblib
+OPC/books/joblibs/KNN-TF/sparse_matrix.joblib
+OPC/books/joblibs/KNN-TF/tfidf_vectorizer.joblib
+OPC/books/joblibs/NN/books_data.pkl
+OPC/books/joblibs/KNN-TF/title_to_index.joblib
+OPC/books/joblibs/NN/books_features.pkl
+OPC/books/joblibs/NN/books_label_encoder.pkl
+OPC/books/joblibs/NN/books_labels.pkl
+OPC/books/joblibs/NN/books_nn_model.keras
+OPC/books/joblibs/NN/books_vectorizer.pkl
