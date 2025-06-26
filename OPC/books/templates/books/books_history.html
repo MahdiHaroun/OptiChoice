@@ -721,7 +721,7 @@ function filterHistory(searchTerm = '') {
             item.model_used.toLowerCase().includes(searchTerm) ||
             (Array.isArray(item.recommended_titles) && 
              item.recommended_titles.some(title => 
-                (typeof title === 'string' ? title : title.title || '').toLowerCase().includes(searchTerm)
+                 title.toLowerCase().includes(searchTerm)
              ));
         
         const matchesModel = !modelFilter || item.model_used === modelFilter;
@@ -794,9 +794,7 @@ function createHistoryItemHtml(item) {
 
     const recommendationsCount = Array.isArray(item.recommended_titles) ? item.recommended_titles.length : 0;
     const previewTitles = Array.isArray(item.recommended_titles) 
-        ? item.recommended_titles.slice(0, 3).map(title => 
-            typeof title === 'string' ? title : title.title || 'Unknown Title'
-          )
+        ? item.recommended_titles.slice(0, 3)
         : [];
 
     return `
@@ -825,14 +823,13 @@ function createHistoryItemHtml(item) {
                     </button>
                 </div>
             </div>
-            ${previewTitles.length > 0 ? `
-                <div class="recommendations-preview">
-                    <div class="preview-title">Recommended Books:</div>
-                    <div class="recommendations-grid">
-                        ${previewTitles.map(title => `<span class="recommendation-tag">${title}</span>`).join('')}
-                        ${recommendationsCount > 3 ? `<span class="recommendation-tag">+${recommendationsCount - 3} more</span>` : ''}
-                    </div>
+            ${previewTitles.length > 0 ? `            <div class="recommendations-preview">
+                <div class="preview-title">Recommended Books:</div>
+                <div class="recommendations-grid">
+                    ${previewTitles.map(title => `<span class="recommendation-tag">${title}</span>`).join('')}
+                    ${recommendationsCount > 3 ? `<span class="recommendation-tag">+${recommendationsCount - 3} more</span>` : ''}
                 </div>
+            </div>
             ` : ''}
         </div>
     `;
@@ -939,9 +936,9 @@ function showHistoryModal(historyId) {
         `;
         
         recommendations.forEach((title, index) => {
-            const bookTitle = typeof title === 'string' ? title : title.title || 'Unknown Title';            modalBodyHtml += `
+            modalBodyHtml += `
                 <div style="padding: 12px; background: var(--input-bg); border-radius: 8px; border-left: 4px solid #6a11cb;">
-                    <strong>${index + 1}.</strong> ${bookTitle}
+                    <strong>${index + 1}.</strong> ${title}
                 </div>
             `;
         });

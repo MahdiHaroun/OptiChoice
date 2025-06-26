@@ -23,7 +23,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('authentication.urls')),  # Authentication URLs
     path('', include('movies.urls')),  # Movies URLs
-    path('', include('books.urls')),  # Books URLs
+    path('books/', include('books.urls')),  # Books URLs with prefix
 ]
 
 # Serve static files during development

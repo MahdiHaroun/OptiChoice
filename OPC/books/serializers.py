@@ -6,7 +6,6 @@ from rest_framework import serializers
 
 class BookRecommendationRequestSerializer(serializers.Serializer): 
     Model_Choices = [
-        ('tfidf', 'tfidf'),
         ('Genre-Based', 'Genre-Based'),
         ('knn', 'knn'),
         ('knn_genre', 'knn_genre'),

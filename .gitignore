@@ -152,3 +152,7 @@ OPC/books/joblibs/NN/books_label_encoder.pkl
 OPC/books/joblibs/NN/books_labels.pkl
 OPC/books/joblibs/NN/books_nn_model.keras
 OPC/books/joblibs/NN/books_vectorizer.pkl
+OPC/books/templates/books/books_history.html
+OPC/books/joblibs/Genre_knn/category_encoder.joblib
+OPC/books/joblibs/Genre_knn/category_knn_sparse.joblib
+OPC/books/joblibs/Genre_knn/books_df.joblib

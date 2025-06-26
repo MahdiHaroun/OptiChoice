@@ -1360,6 +1360,10 @@ function setupSaveButton() {
         // Add selected recommendations to the data
         saveData.selected_recommendations[currentRequestData.book_title] = selectedTitles;
 
+        // Debug: log the data being sent
+        console.log('Saving data:', saveData);
+        console.log('currentRequestData:', currentRequestData);
+
         // Send save request to server
         $.ajax({
             url: '{% url "books:save_recommendations" %}',

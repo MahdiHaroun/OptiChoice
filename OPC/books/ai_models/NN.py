@@ -100,19 +100,11 @@ def recommend_books_nn(book_titles, top_k=10):
             input_index = book_match.index[0]
             similarities[input_index] = -1
             
-            # Get more candidates than needed for randomization (up to 3x the requested amount)
-            extended_k = min(top_k * 3, len(books_data))
-            top_indices = np.argsort(similarities)[::-1][:extended_k]
+            # Get top-k most similar books
+            top_indices = np.argsort(similarities)[::-1][:top_k]
             
-            # Get candidate recommendations
-            candidate_recommendations = books_data.iloc[top_indices][title_column].tolist()
-            
-            # Randomly sample from candidates to add variety for regeneration
-            import random
-            if len(candidate_recommendations) > top_k:
-                recommendations = random.sample(candidate_recommendations, top_k)
-            else:
-                recommendations = candidate_recommendations
+            # Extract book titles
+            recommendations = books_data.iloc[top_indices][title_column].tolist()
             
             results[title] = recommendations
     

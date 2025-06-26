@@ -109,11 +109,9 @@ def recommend_books_embeddings(book_titles, top_k=10):
             query_embedding = torch.nn.functional.normalize(query_embedding, p=2, dim=0)
 
             scores = util.pytorch_cos_sim(query_embedding, book_embeddings)[0]
-            # Get more results than needed for randomization (up to 3x the requested amount)
-            extended_k = min(top_k * 3, len(books))
-            top_results = torch.topk(scores, k=extended_k + 1)
+            top_results = torch.topk(scores, k=top_k + 1)
 
-            candidate_recommendations = []
+            recommendations = []
             for i, score in zip(top_results[1], top_results[0]):
                 idx_int = i.item()
                 recommended_title = books.iloc[idx_int][title_column]
@@ -122,18 +120,11 @@ def recommend_books_embeddings(book_titles, top_k=10):
                 if recommended_title.lower() == title.lower():
                     continue
                     
-                candidate_recommendations.append(recommended_title)
+                recommendations.append(recommended_title)
                 
-                # Stop when we have enough candidates
-                if len(candidate_recommendations) >= extended_k:
+                # Stop when we have enough recommendations
+                if len(recommendations) >= top_k:
                     break
-            
-            # Randomly sample from candidates to add variety for regeneration
-            import random
-            if len(candidate_recommendations) > top_k:
-                recommendations = random.sample(candidate_recommendations, top_k)
-            else:
-                recommendations = candidate_recommendations
             
             results[title] = recommendations
             

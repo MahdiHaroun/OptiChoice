@@ -29,12 +29,21 @@
     --btn-hover-dark: #3b3e5a;
     --input-hover-dark: #23234a;
     --primary-hover-dark: #818cf8;
+    --text-primary: #2d3748;
+    --text-secondary: #718096;
+    --input-bg: #ffffff;
+    --border-color: #e2e8f0;
 }
+
 [data-theme="dark"] {
     --bg: #18181b;
     --card-bg: var(--card-bg-dark);
     --border: var(--border-dark);
     --text: var(--text-dark);
+    --text-primary: var(--text-dark);
+    --text-secondary: #a0aec0;
+    --input-bg: var(--card-bg-dark);
+    --border-color: var(--border-dark);
 }
 
 /* Dark theme card hover */
@@ -202,76 +211,19 @@
     gap: 0.5rem;
 }
 
-.card-header i {
-    font-size: 1.3rem;
+.card-header .text-muted {
+    color: rgba(255, 255, 255, 0.8);
+    margin: 0.5rem 0 0 0;
+    font-size: 0.9rem;
 }
 
-/* Form Styling */
-.form-group {
-    margin-bottom: 1.5rem;
+.card-body {
+    padding: 1.5rem; /* Reduced padding */
 }
 
-.form-label {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-weight: 600;
-    color: var(--text);
-    margin-bottom: 0.5rem;
-    font-size: 0.95rem;
-}
-
-.form-control {
-    width: 100%;
-    padding: 0.875rem 1rem;
-    border: 2px solid var(--border);
-    border-radius: 10px;
-    background: var(--card-bg);
-    color: var(--text);
-    font-size: 1rem;
-    transition: all 0.3s ease;
-}
-
-.form-control:focus {
-    outline: none;
-    border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
-}
-
-.book-search-input {
-    width: 100%;
-    padding: 0.875rem 1rem;
-    border: 2px solid var(--border);
-    border-radius: 10px;
-    background: var(--card-bg);
-    color: var(--text);
-    font-size: 1rem;
-    transition: all 0.3s ease;
-}
-
-.book-search-input:focus {
-    outline: none;
-    border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
-}
-
-.form-text {
-    font-size: 0.85rem;
-    color: var(--text-light);
-    margin-top: 0.25rem;
-}
-
-/* Form Row */
-.form-row {
-    display: grid;
-    grid-template-columns: 2fr 1fr;
-    gap: 1.5rem;
-}
-
-@media (max-width: 768px) {
-    .form-row {
-        grid-template-columns: 1fr;
-    }
+/* Input Section */
+.input-card {
+    margin-bottom: 2rem;
 }
 
 /* Button Group */
@@ -280,6 +232,57 @@
     gap: 1rem;
     align-items: center;
     margin-top: 1.5rem;
+}
+
+/* Recommend Button */
+.btn-recommend {
+    flex: 1;
+    padding: 0.875rem 1.5rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    border-radius: 10px;
+    color: white;
+    font-size: 1rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    justify-content: center;
+}
+
+.btn-recommend:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    background: linear-gradient(135deg, #5a67d8 0%, #667eea 100%);
+}
+
+/* Regenerate Button */
+.btn-regenerate {
+    padding: 0.875rem 1.25rem;
+    background: #718096;
+    border: none;
+    border-radius: 10px;
+    color: white;
+    font-size: 0.95rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(113, 128, 150, 0.3);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    justify-content: center;
+}
+
+.btn-regenerate:hover {
+    transform: translateY(-2px);
+    background: #4a5568;
+    box-shadow: 0 4px 12px rgba(113, 128, 150, 0.4);
 }
 
 /* Buttons */
@@ -408,10 +411,30 @@
     border: none;
     background: transparent;
     box-shadow: none;
+    text-align: center;
+    padding: 3rem 2rem;
 }
 
 .loading-spinner {
-    margin-bottom: 1.5rem;
+    margin: 2rem auto;
+    position: relative;
+    width: 80px;
+    height: 80px;
+}
+
+.spinner-ring {
+    display: inline-block;
+    width: 80px;
+    height: 80px;
+    border: 4px solid transparent;
+    border-top: 4px solid #6a11cb;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }
 
 .progress-container {
@@ -445,10 +468,15 @@
 .loading-title {
     color: var(--text);
     margin-bottom: 0.5rem;
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 1rem 0 0.5rem;
 }
 
 .loading-text {
     color: var(--text-light);
+    font-size: 1rem;
+    margin: 0;
 }
 
 /* Results Section */
@@ -745,6 +773,161 @@
     background: rgba(129, 140, 248, 0.2);
     border-color: rgba(129, 140, 248, 0.4);
 }
+
+/* Additional CSS for Genres Grid */
+.genres-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+[data-theme="dark"] .genres-grid {
+    background: transparent;
+}
+
+.genre-item {
+    background: rgba(255, 255, 255, 0.9);
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 1.2rem;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    position: relative;
+    min-height: 60px;
+    display: flex;
+    align-items: center;
+    user-select: none;
+}
+[data-theme="dark"] .genre-item {
+    background: #232336;
+    border-color: #353657;
+    color: var(--text-dark);
+}
+
+.genre-item:hover {
+    background: rgba(102, 126, 234, 0.05);
+    border-color: #667eea;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+}
+[data-theme="dark"] .genre-item:hover,
+[data-theme="dark"] .genre-item.selected,
+[data-theme="dark"] .genre-item:has(.custom-control-input:checked) {
+    background: #282a36;
+    border-color: var(--primary-hover-dark);
+    color: var(--text-dark);
+    box-shadow: 0 4px 16px rgba(129,140,248,0.10);
+}
+
+.genre-item .custom-control {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    min-height: auto;
+}
+
+.genre-item .custom-control-input {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    z-index: 2;
+    cursor: pointer;
+    margin: 0;
+}
+
+.genre-item .custom-control-label {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-weight: 500;
+    font-size: 1rem;
+    color: #2d3748;
+    position: relative;
+    padding-left: 2.5rem;
+    pointer-events: none;
+    z-index: 1;
+}
+[data-theme="dark"] .genre-item .custom-control-label {
+    color: var(--text-dark);
+}
+
+.genre-item .custom-control-label::before {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 20px;
+    height: 20px;
+    border: 2px solid #cbd5e0;
+    border-radius: 4px;
+    background: #ffffff;
+    content: '';
+    transition: all 0.3s ease;
+}
+
+.genre-item .custom-control-label::after {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 20px;
+    height: 20px;
+    content: '';
+    background: no-repeat 50%/50% 50%;
+    transition: all 0.3s ease;
+}
+
+.genre-item .custom-control-input:checked ~ .custom-control-label {
+    color: #667eea;
+    font-weight: 600;
+}
+[data-theme="dark"] .genre-item .custom-control-input:checked ~ .custom-control-label {
+    color: var(--primary-hover-dark);
+}
+
+.genre-item .custom-control-input:checked ~ .custom-control-label::before {
+    background: #667eea;
+    border-color: #667eea;
+}
+
+.genre-item .custom-control-input:checked ~ .custom-control-label::after {
+    background-image: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3E%3Cpath fill='%23fff' d='m6.564.75-3.59 3.612-1.538-1.55L0 4.26 2.974 7.25 8 2.193z'/%3E%3C/svg%3E");
+}
+
+.genre-item:has(.custom-control-input:checked),
+.genre-item.selected {
+    background: rgba(102, 126, 234, 0.1);
+    border-color: #667eea;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+}
+
+/* Add active state for better feedback */
+.genre-item:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
+}
+
+@media (max-width: 768px) {
+    .genres-grid {
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 0.75rem;
+    }
+    
+    .genre-item {
+        padding: 0.75rem;
+    }
+    
+    .custom-control-label {
+        font-size: 0.9rem;
+    }
+}
 </style>
 
 <!-- Shared Header -->
@@ -770,22 +953,252 @@
     <div class="card input-card">
         <div class="card-header">
             <h3><i class="fas fa-tags"></i> Select Your Favorite Genres</h3>
+            <p class="text-muted">Choose one or more genres to get personalized book recommendations</p>
         </div>
         <div class="card-body">
-            <div class="genre-selection">
-                <p style="margin-bottom: 1rem; color: var(--text-light);">Choose one or more genres that interest you:</p>
-                <div class="genre-grid" id="genre-grid">
-                    <!-- Genres will be populated here -->
+            <div id="genre-form">
+                <!-- Genre Grid -->
+                <div class="genres-grid">
+                    <!-- Fiction -->
+                    <div class="genre-item">
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" id="genre-fiction" name="genres" value="Fiction">
+                            <label class="custom-control-label" for="genre-fiction">
+                                <i class="fas fa-book" style="color: #3498db;"></i>
+                                Fiction
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Non-Fiction -->
+                    <div class="genre-item">
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" id="genre-non-fiction" name="genres" value="Non-Fiction">
+                            <label class="custom-control-label" for="genre-non-fiction">
+                                <i class="fas fa-book-open" style="color: #2ecc71;"></i>
+                                Non-Fiction
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Science Fiction -->
+                    <div class="genre-item">
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" id="genre-science-fiction" name="genres" value="Science Fiction">
+                            <label class="custom-control-label" for="genre-science-fiction">
+                                <i class="fas fa-rocket" style="color: #3498db;"></i>
+                                Science Fiction
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Fantasy -->
+                    <div class="genre-item">
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" id="genre-fantasy" name="genres" value="Fantasy">
+                            <label class="custom-control-label" for="genre-fantasy">
+                                <i class="fas fa-magic" style="color: #9b59b6;"></i>
+                                Fantasy
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Mystery -->
+                    <div class="genre-item">
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" id="genre-mystery" name="genres" value="Mystery">
+                            <label class="custom-control-label" for="genre-mystery">
+                                <i class="fas fa-search" style="color: #95a5a6;"></i>
+                                Mystery
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Romance -->
+                    <div class="genre-item">
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" id="genre-romance" name="genres" value="Romance">
+                            <label class="custom-control-label" for="genre-romance">
+                                <i class="fas fa-heart" style="color: #e74c3c;"></i>
+                                Romance
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Thriller -->
+                    <div class="genre-item">
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" id="genre-thriller" name="genres" value="Thriller">
+                            <label class="custom-control-label" for="genre-thriller">
+                                <i class="fas fa-bolt" style="color: #f39c12;"></i>
+                                Thriller
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Horror -->
+                    <div class="genre-item">
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" id="genre-horror" name="genres" value="Horror">
+                            <label class="custom-control-label" for="genre-horror">
+                                <i class="fas fa-ghost" style="color: #e74c3c;"></i>
+                                Horror
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Biography -->
+                    <div class="genre-item">
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" id="genre-biography" name="genres" value="Biography">
+                            <label class="custom-control-label" for="genre-biography">
+                                <i class="fas fa-user" style="color: #34495e;"></i>
+                                Biography
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- History -->
+                    <div class="genre-item">
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" id="genre-history" name="genres" value="History">
+                            <label class="custom-control-label" for="genre-history">
+                                <i class="fas fa-landmark" style="color: #8e44ad;"></i>
+                                History
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Science -->
+                    <div class="genre-item">
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" id="genre-science" name="genres" value="Science">
+                            <label class="custom-control-label" for="genre-science">
+                                <i class="fas fa-microscope" style="color: #27ae60;"></i>
+                                Science
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Philosophy -->
+                    <div class="genre-item">
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" id="genre-philosophy" name="genres" value="Philosophy">
+                            <label class="custom-control-label" for="genre-philosophy">
+                                <i class="fas fa-brain" style="color: #16a085;"></i>
+                                Philosophy
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Poetry -->
+                    <div class="genre-item">
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" id="genre-poetry" name="genres" value="Poetry">
+                            <label class="custom-control-label" for="genre-poetry">
+                                <i class="fas fa-feather-alt" style="color: #e91e63;"></i>
+                                Poetry
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Drama -->
+                    <div class="genre-item">
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" id="genre-drama" name="genres" value="Drama">
+                            <label class="custom-control-label" for="genre-drama">
+                                <i class="fas fa-theater-masks" style="color: #8e44ad;"></i>
+                                Drama
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Adventure -->
+                    <div class="genre-item">
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" id="genre-adventure" name="genres" value="Adventure">
+                            <label class="custom-control-label" for="genre-adventure">
+                                <i class="fas fa-mountain" style="color: #f39c12;"></i>
+                                Adventure
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Business -->
+                    <div class="genre-item">
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" id="genre-business" name="genres" value="Business">
+                            <label class="custom-control-label" for="genre-business">
+                                <i class="fas fa-briefcase" style="color: #2c3e50;"></i>
+                                Business
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Health -->
+                    <div class="genre-item">
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" id="genre-health" name="genres" value="Health">
+                            <label class="custom-control-label" for="genre-health">
+                                <i class="fas fa-heartbeat" style="color: #e74c3c;"></i>
+                                Health
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Self-Help -->
+                    <div class="genre-item">
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" id="genre-self-help" name="genres" value="Self-Help">
+                            <label class="custom-control-label" for="genre-self-help">
+                                <i class="fas fa-hand-holding-heart" style="color: #f39c12;"></i>
+                                Self-Help
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Travel -->
+                    <div class="genre-item">
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" id="genre-travel" name="genres" value="Travel">
+                            <label class="custom-control-label" for="genre-travel">
+                                <i class="fas fa-plane" style="color: #3498db;"></i>
+                                Travel
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Cooking -->
+                    <div class="genre-item">
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" id="genre-cooking" name="genres" value="Cooking">
+                            <label class="custom-control-label" for="genre-cooking">
+                                <i class="fas fa-utensils" style="color: #e67e22;"></i>
+                                Cooking
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="button-group">
+                    <button type="button" class="btn-recommend" id="get-recommendations">
+                        <i class="fas fa-magic"></i> Get Recommendations
+                    </button>
+                    <button type="button" class="btn-regenerate" id="regenerate-recommendations" style="display: none;">
+                        <i class="fas fa-redo-alt"></i> New Recommendations
+                    </button>
                 </div>
             </div>
             
-            <form id="genre-recommendation-form">
+            <form id="genre-recommendation-form" style="display: none;">
                 {% csrf_token %}
                 <div class="form-row">
                     <div class="form-group">
                         <label for="model-select" class="form-label"><i class="fas fa-robot"></i> AI Model:</label>
                         <select id="model-select" class="form-control">
-                            <option value="Embeddings">Embeddings</option>
+                            <option value="Genre-Based" selected>Genre-Based</option>
+                            <option value="knn_genre">KNN Genre-Based</option>
                         </select>
                     </div>
                     <div class="form-group">
@@ -798,29 +1211,18 @@
                         </select>
                     </div>
                 </div>
-                <div class="button-group">
-                    <button type="submit" class="btn btn-primary btn-recommend" disabled>
-                        <i class="fas fa-magic"></i> Get Recommendations
-                    </button>
-                    <button type="button" id="regenerate-btn" class="btn btn-secondary btn-regenerate" style="display: none;">
-                        <i class="fas fa-sync-alt"></i> Regenerate
-                    </button>
-                </div>
             </form>
         </div>
     </div>
     
     <!-- Loading Section -->
-    <div id="loading-section" class="loading-section">
-        <div class="card loading-card">
-            <div class="card-body text-center">
-                <div class="loading-spinner">
-                    <div class="progress-container"><div class="progress-bar"></div></div>
-                    <div class="progress-text">Analyzing your genre preferences...</div>
-                </div>
-                <h4 class="loading-title">Finding Perfect Matches</h4>
-                <p class="loading-text">Our AI is discovering books you'll love based on your selected genres...</p>
+    <div class="card loading-section" id="loading-section" style="display: none;">
+        <div class="card-body loading-card">
+            <div class="loading-spinner">
+                <div class="spinner-ring"></div>
             </div>
+            <h4 class="loading-title">Finding Perfect Books</h4>
+            <p class="loading-text">Analyzing genres and selecting the best recommendations for you...</p>
         </div>
     </div>
     
@@ -833,7 +1235,7 @@
                     <div id="recommendation-info" class="recommendation-info"></div>
                 </div>
                 <div class="results-actions">
-                    <button id="select-all-btn" class="btn btn-outline-primary">
+                    <button id="select-all-btn" class="btn btn-outline-primary" style="display: none;">
                         <i class="fas fa-check-double"></i> Select All
                     </button>
                     <button id="save-selected-btn" class="btn btn-success" style="display: none;">
@@ -866,199 +1268,231 @@
 </div>
 
 <script>
-// Genre data
-const genres = [
-    { name: 'Fiction', emoji: '📖' },
-    { name: 'Non-Fiction', emoji: '📚' },
-    { name: 'Science Fiction', emoji: '🚀' },
-    { name: 'Fantasy', emoji: '🧙‍♂️' },
-    { name: 'Mystery', emoji: '🔍' },
-    { name: 'Romance', emoji: '💕' },
-    { name: 'Thriller', emoji: '😨' },
-    { name: 'Horror', emoji: '👻' },
-    { name: 'Biography', emoji: '👤' },
-    { name: 'History', emoji: '🏛️' },
-    { name: 'Science', emoji: '🔬' },
-    { name: 'Philosophy', emoji: '🤔' },
-    { name: 'Poetry', emoji: '✨' },
-    { name: 'Drama', emoji: '🎭' },
-    { name: 'Adventure', emoji: '🗺️' },
-    { name: 'Business', emoji: '💼' },
-    { name: 'Health', emoji: '🏥' },
-    { name: 'Self-Help', emoji: '💪' },
-    { name: 'Travel', emoji: '✈️' },
-    { name: 'Cooking', emoji: '👩‍🍳' }
-];
-
-let selectedGenres = new Set();
-let recommendationData = null;
-let selectedBooks = new Set();
-
-// Initialize the page
 document.addEventListener('DOMContentLoaded', function() {
-    renderGenres();
-    initializeEventListeners();
-});
+    const getRecommendationsBtn = document.getElementById('get-recommendations');
+    const regenerateBtn = document.getElementById('regenerate-recommendations');
+    const loadingSection = document.getElementById('loading-section');
+    const resultsSection = document.getElementById('results-section');
+    const errorSection = document.getElementById('error-section');
+    const recommendationsGrid = document.getElementById('recommendations-grid');
+    const recommendationInfo = document.getElementById('recommendation-info');
+    const errorMessage = document.getElementById('error-message');
 
-function renderGenres() {
-    const genreGrid = document.getElementById('genre-grid');
-    genreGrid.innerHTML = '';
-    
-    genres.forEach(genre => {
-        const genreElement = document.createElement('div');
-        genreElement.className = 'genre-option';
-        genreElement.innerHTML = `
-            <span class="genre-emoji">${genre.emoji}</span>
-            <span class="genre-name">${genre.name}</span>
+    function getSelectedGenres() {
+        const checkboxes = document.querySelectorAll('input[name="genres"]:checked');
+        return Array.from(checkboxes).map(cb => cb.value);
+    }
+
+    function showLoading() {
+        loadingSection.style.display = 'block';
+        resultsSection.style.display = 'none';
+        errorSection.style.display = 'none';
+    }
+
+    function hideLoading() {
+        loadingSection.style.display = 'none';
+    }
+
+    function showError(message) {
+        hideLoading();
+        errorMessage.textContent = message;
+        errorSection.style.display = 'block';
+        resultsSection.style.display = 'none';
+    }
+
+    function showResults(data) {
+        hideLoading();
+        if (data.error) {
+            showError(data.error);
+            return;
+        }
+
+        const books = data.recommendations || [];
+        const selectedGenres = getSelectedGenres();
+        
+        recommendationInfo.innerHTML = `
+            <i class="fas fa-info-circle"></i>
+            Found <strong>${books.length}</strong> great books for genres: <strong>${selectedGenres.join(', ')}</strong>
         `;
+
+        recommendationsGrid.innerHTML = '';
+
+        if (books.length === 0) {
+            recommendationsGrid.innerHTML = `
+                <div class="no-results">
+                    <i class="fas fa-book"></i>
+                    <h4>No Books Found</h4>
+                    <p>Try selecting different genres or fewer genre combinations.</p>
+                </div>
+            `;
+        } else {
+            books.forEach((book, index) => {
+                const bookCard = document.createElement('div');
+                bookCard.className = 'book-card';
+                bookCard.setAttribute('data-book-index', index);
+                bookCard.innerHTML = `
+                    <div class="book-cover">
+                        <div class="book-select-checkbox" onclick="toggleBookSelection(${index}, event)">
+                            <i class="fas fa-check" style="display: none;"></i>
+                        </div>
+                        📚
+                    </div>
+                    <div class="book-info">
+                        <h4 class="book-title">${book.title}</h4>
+                        <p class="book-author">by ${book.author || 'Unknown Author'}</p>
+                        ${book.description ? `<p class="book-description">${book.description}</p>` : ''}
+                        <div class="input-source">
+                            <i class="fas fa-tags"></i>
+                            Genre-based recommendation (${data.model_used || 'Genre-Based'} model)
+                        </div>
+                    </div>
+                `;
+                recommendationsGrid.appendChild(bookCard);
+            });
+        }
+
+        resultsSection.style.display = 'block';
+        errorSection.style.display = 'none';
         
-        genreElement.addEventListener('click', () => {
-            toggleGenre(genre.name, genreElement);
-        });
+        // Show regenerate button
+        regenerateBtn.style.display = 'inline-flex';
         
-        genreGrid.appendChild(genreElement);
-    });
-}
-
-function toggleGenre(genreName, element) {
-    if (selectedGenres.has(genreName)) {
-        selectedGenres.delete(genreName);
-        element.classList.remove('selected');
-    } else {
-        selectedGenres.add(genreName);
-        element.classList.add('selected');
+        // Reset selections and update button states
+        selectedBooks.clear();
+        updateSelectedCount();
     }
-    
-    updateRecommendButton();
-}
 
-function updateRecommendButton() {
-    const recommendBtn = document.querySelector('.btn-recommend');
-    recommendBtn.disabled = selectedGenres.size === 0;
-}
+    function getRecommendations() {
+        const selectedGenres = getSelectedGenres();
+        
+        if (selectedGenres.length === 0) {
+            alert('Please select at least one genre to get recommendations.');
+            return;
+        }
 
-function initializeEventListeners() {
-    const form = document.getElementById('genre-recommendation-form');
-    const regenerateBtn = document.getElementById('regenerate-btn');
-    const selectAllBtn = document.getElementById('select-all-btn');
-    const saveSelectedBtn = document.getElementById('save-selected-btn');
-    
-    form.addEventListener('submit', handleFormSubmit);
-    regenerateBtn.addEventListener('click', handleRegenerate);
-    selectAllBtn.addEventListener('click', handleSelectAll);
-    saveSelectedBtn.addEventListener('click', handleSaveSelected);
-}
+        const modelUsed = document.getElementById('model-select').value;
+        const numRecommendations = parseInt(document.getElementById('num-recommendations').value);
 
-async function handleFormSubmit(e) {
-    e.preventDefault();
-    
-    if (selectedGenres.size === 0) {
-        showError('Please select at least one genre.');
-        return;
-    }
-    
-    const modelUsed = document.getElementById('model-select').value;
-    const numRecommendations = parseInt(document.getElementById('num-recommendations').value);
-    
-    showLoading();
-    
-    try {
-        const response = await fetch('/api/books/genre-recommendations/', {
+        showLoading();
+
+        // Make AJAX request to get genre-based recommendations
+        fetch('/api/books/genre-recommendations/', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'X-CSRFToken': getCSRFToken()
             },
             body: JSON.stringify({
-                genres: Array.from(selectedGenres),
+                genres: selectedGenres,
                 model: modelUsed,
-                num_recommendations: numRecommendations
+                num_recommendations: numRecommendations,
+                regenerate: false
             })
+        })
+        .then(response => response.json())
+        .then(data => {
+            showResults(data);
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showError('Failed to get recommendations. Please try again.');
+        });
+    }
+
+    function regenerateRecommendations() {
+        const selectedGenres = getSelectedGenres();
+        
+        if (selectedGenres.length === 0) {
+            alert('Please select at least one genre to get recommendations.');
+            return;
+        }
+
+        const modelUsed = document.getElementById('model-select').value;
+        const numRecommendations = parseInt(document.getElementById('num-recommendations').value);
+
+        showLoading();
+
+        // Make AJAX request to get genre-based recommendations
+        fetch('/api/books/genre-recommendations/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCSRFToken()
+            },
+            body: JSON.stringify({
+                genres: selectedGenres,
+                model: modelUsed,
+                num_recommendations: numRecommendations,
+                regenerate: true
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            showResults(data);
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showError('Failed to get recommendations. Please try again.');
+        });
+    }
+
+    // Event listeners
+    getRecommendationsBtn.addEventListener('click', getRecommendations);
+    regenerateBtn.addEventListener('click', regenerateRecommendations);
+    
+    // Add event listeners for selection buttons
+    const selectAllBtn = document.getElementById('select-all-btn');
+    const saveSelectedBtn = document.getElementById('save-selected-btn');
+    
+    if (selectAllBtn) {
+        selectAllBtn.addEventListener('click', selectAllBooks);
+    }
+    if (saveSelectedBtn) {
+        saveSelectedBtn.addEventListener('click', saveSelectedBooks);
+    }
+
+    // Add click handlers for genre items
+    document.querySelectorAll('.genre-item').forEach(item => {
+        item.addEventListener('click', function(e) {
+            // Prevent double-triggering if clicked directly on checkbox or label
+            if (e.target.type === 'checkbox') {
+                return; // Let the checkbox handle it naturally
+            }
+            
+            const checkbox = this.querySelector('input[type="checkbox"]');
+            if (checkbox) {
+                checkbox.checked = !checkbox.checked;
+                
+                // Trigger change event for any listeners
+                const changeEvent = new Event('change', { bubbles: true });
+                checkbox.dispatchEvent(changeEvent);
+                
+                // Update visual state immediately
+                if (checkbox.checked) {
+                    this.classList.add('selected');
+                } else {
+                    this.classList.remove('selected');
+                }
+            }
         });
         
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.error || 'Failed to get recommendations');
-        }
-        
-        const data = await response.json();
-        recommendationData = data;
-        
-        hideLoading();
-        showResults(data);
-        
-    } catch (error) {
-        console.error('Error:', error);
-        hideLoading();
-        showError(error.message || 'Failed to get recommendations. Please try again.');
-    }
-}
-
-function handleRegenerate() {
-    const form = document.getElementById('genre-recommendation-form');
-    handleFormSubmit({ preventDefault: () => {} });
-}
-
-function showLoading() {
-    document.getElementById('loading-section').style.display = 'block';
-    document.getElementById('results-section').style.display = 'none';
-    document.getElementById('error-section').style.display = 'none';
-}
-
-function hideLoading() {
-    document.getElementById('loading-section').style.display = 'none';
-}
-
-function showResults(data) {
-    document.getElementById('results-section').style.display = 'block';
-    document.getElementById('error-section').style.display = 'none';
-    document.getElementById('regenerate-btn').style.display = 'inline-flex';
-    
-    const recommendationInfo = document.getElementById('recommendation-info');
-    recommendationInfo.textContent = `Based on genres: ${Array.from(selectedGenres).join(', ')} • Model: ${data.model_used}`;
-    
-    renderRecommendations(data.recommendations);
-    selectedBooks.clear();
-    updateSaveButton();
-}
-
-function renderRecommendations(recommendations) {
-    const grid = document.getElementById('recommendations-grid');
-    grid.innerHTML = '';
-    
-    recommendations.forEach((book, index) => {
-        const bookCard = createBookCard(book, index);
-        grid.appendChild(bookCard);
-    });
-}
-
-function createBookCard(book, index) {
-    const card = document.createElement('div');
-    card.className = 'book-card';
-    card.dataset.bookIndex = index;
-    
-    card.innerHTML = `
-        <div class="book-cover">
-            <div class="book-select-checkbox" onclick="toggleBookSelection(${index}, event)">
-                <i class="fas fa-check" style="display: none;"></i>
-            </div>
-            📚
-        </div>
-        <div class="book-info">
-            <h4 class="book-title">${book.title}</h4>
-            <p class="book-author">by ${book.author || 'Unknown Author'}</p>
-            ${book.description ? `<p class="book-description">${book.description}</p>` : ''}
-        </div>
-    `;
-    
-    card.addEventListener('click', (e) => {
-        if (!e.target.closest('.book-select-checkbox')) {
-            toggleBookSelection(index);
+        // Also handle checkbox change events directly
+        const checkbox = item.querySelector('input[type="checkbox"]');
+        if (checkbox) {
+            checkbox.addEventListener('change', function() {
+                if (this.checked) {
+                    item.classList.add('selected');
+                } else {
+                    item.classList.remove('selected');
+                }
+            });
         }
     });
-    
-    return card;
-}
+});
+
+// Global variables for book selection functionality
+let selectedBooks = new Set();
+let recommendationData = null;
 
 function toggleBookSelection(index, event) {
     if (event) {
@@ -1066,6 +1500,8 @@ function toggleBookSelection(index, event) {
     }
     
     const card = document.querySelector(`[data-book-index="${index}"]`);
+    if (!card) return;
+    
     const checkbox = card.querySelector('.book-select-checkbox');
     const checkIcon = checkbox.querySelector('i');
     
@@ -1081,133 +1517,71 @@ function toggleBookSelection(index, event) {
         checkIcon.style.display = 'block';
     }
     
-    updateSaveButton();
+    updateSelectedCount();
 }
 
-function handleSelectAll() {
-    const recommendations = recommendationData.recommendations;
-    const allSelected = selectedBooks.size === recommendations.length;
+function updateSelectedCount() {
+    const selectedCount = document.getElementById('selected-count');
+    const selectAllBtn = document.getElementById('select-all-btn');
+    const saveSelectedBtn = document.getElementById('save-selected-btn');
     
-    if (allSelected) {
-        // Deselect all
-        selectedBooks.clear();
-        document.querySelectorAll('.book-card').forEach(card => {
-            card.classList.remove('selected');
-            const checkbox = card.querySelector('.book-select-checkbox');
-            checkbox.classList.remove('checked');
-            checkbox.querySelector('i').style.display = 'none';
-        });
-        document.getElementById('select-all-btn').innerHTML = '<i class="fas fa-check-double"></i> Select All';
-    } else {
-        // Select all
-        recommendations.forEach((_, index) => {
+    if (selectedCount) {
+        selectedCount.textContent = selectedBooks.size;
+    }
+    
+    // Show/hide buttons based on whether there are recommendations and selections
+    const hasRecommendations = document.querySelectorAll('.book-card').length > 0;
+    const hasSelections = selectedBooks.size > 0;
+    
+    if (selectAllBtn) {
+        selectAllBtn.style.display = hasRecommendations ? 'inline-flex' : 'none';
+    }
+    if (saveSelectedBtn) {
+        saveSelectedBtn.style.display = hasSelections ? 'inline-flex' : 'none';
+    }
+}
+
+function selectAllBooks() {
+    const bookCards = document.querySelectorAll('.book-card[data-book-index]');
+    bookCards.forEach(card => {
+        const index = parseInt(card.getAttribute('data-book-index'));
+        if (!selectedBooks.has(index)) {
             selectedBooks.add(index);
-            const card = document.querySelector(`[data-book-index="${index}"]`);
             card.classList.add('selected');
             const checkbox = card.querySelector('.book-select-checkbox');
+            const checkIcon = checkbox.querySelector('i');
             checkbox.classList.add('checked');
-            checkbox.querySelector('i').style.display = 'block';
-        });
-        document.getElementById('select-all-btn').innerHTML = '<i class="fas fa-times"></i> Deselect All';
-    }
-    
-    updateSaveButton();
+            checkIcon.style.display = 'block';
+        }
+    });
+    updateSelectedCount();
 }
 
-function updateSaveButton() {
-    const saveBtn = document.getElementById('save-selected-btn');
-    const selectAllBtn = document.getElementById('select-all-btn');
-    const count = selectedBooks.size;
-    
-    if (count > 0) {
-        saveBtn.style.display = 'inline-flex';
-        document.getElementById('selected-count').textContent = count;
-    } else {
-        saveBtn.style.display = 'none';
-    }
-    
-    // Update select all button text
-    if (recommendationData && count === recommendationData.recommendations.length) {
-        selectAllBtn.innerHTML = '<i class="fas fa-times"></i> Deselect All';
-    } else {
-        selectAllBtn.innerHTML = '<i class="fas fa-check-double"></i> Select All';
-    }
-}
-
-async function handleSaveSelected() {
+function saveSelectedBooks() {
     if (selectedBooks.size === 0) {
-        showError('Please select at least one book to save.');
+        alert('Please select at least one book to save.');
         return;
     }
     
-    const selectedBookData = Array.from(selectedBooks).map(index => 
-        recommendationData.recommendations[index]
-    );
-    
-    try {
-        const response = await fetch('/api/books/save-recommendations/', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': getCSRFToken()
-            },
-            body: JSON.stringify({
-                recommendations: selectedBookData,
-                model_used: recommendationData.model_used,
-                genres: Array.from(selectedGenres)
-            })
-        });
-        
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.error || 'Failed to save recommendations');
-        }
-        
-        // Show success message
-        const successMessage = document.getElementById('success-message');
+    // Show success message
+    const successMessage = document.getElementById('success-message');
+    if (successMessage) {
         successMessage.style.display = 'block';
-        
-        // Hide success message after 5 seconds
         setTimeout(() => {
             successMessage.style.display = 'none';
-        }, 5000);
-        
-        // Reset selections
-        selectedBooks.clear();
-        document.querySelectorAll('.book-card').forEach(card => {
-            card.classList.remove('selected');
-            const checkbox = card.querySelector('.book-select-checkbox');
-            checkbox.classList.remove('checked');
-            checkbox.querySelector('i').style.display = 'none';
-        });
-        updateSaveButton();
-        
-    } catch (error) {
-        console.error('Error saving recommendations:', error);
-        showError(error.message || 'Failed to save recommendations. Please try again.');
+        }, 3000);
     }
-}
-
-function showError(message) {
-    document.getElementById('error-message').textContent = message;
-    document.getElementById('error-section').style.display = 'block';
-    document.getElementById('results-section').style.display = 'none';
-    document.getElementById('loading-section').style.display = 'none';
-}
-
-function resetForm() {
-    document.getElementById('error-section').style.display = 'none';
-    document.getElementById('results-section').style.display = 'none';
-    document.getElementById('regenerate-btn').style.display = 'none';
+    
+    // Clear selections
     selectedBooks.clear();
-    selectedGenres.clear();
-    
-    // Reset genre selections
-    document.querySelectorAll('.genre-option').forEach(option => {
-        option.classList.remove('selected');
+    document.querySelectorAll('.book-card').forEach(card => {
+        card.classList.remove('selected');
+        const checkbox = card.querySelector('.book-select-checkbox');
+        const checkIcon = checkbox.querySelector('i');
+        checkbox.classList.remove('checked');
+        checkIcon.style.display = 'none';
     });
-    
-    updateRecommendButton();
+    updateSelectedCount();
 }
 
 // CSRF Token utility
@@ -1228,6 +1602,28 @@ function getCookie(name) {
 
 function getCSRFToken() {
     return getCookie('csrftoken') || document.querySelector('[name=csrfmiddlewaretoken]')?.value || '';
+}
+
+function resetForm() {
+    // Hide all sections except the input form
+    document.getElementById('loading-section').style.display = 'none';
+    document.getElementById('results-section').style.display = 'none';
+    document.getElementById('error-section').style.display = 'none';
+    
+    // Reset genre selections
+    document.querySelectorAll('input[name="genres"]').forEach(checkbox => {
+        checkbox.checked = false;
+    });
+    document.querySelectorAll('.genre-item').forEach(item => {
+        item.classList.remove('selected');
+    });
+    
+    // Hide regenerate button
+    document.getElementById('regenerate-recommendations').style.display = 'none';
+    
+    // Clear selections
+    selectedBooks.clear();
+    updateSelectedCount();
 }
 </script>
 

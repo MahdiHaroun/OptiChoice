@@ -17,6 +17,8 @@ from .models import Book, BookRecommendationHistory
 from .ai_models.Embeddings import recommend_books_embeddings
 from .ai_models.KNN import recommend_books_knn
 from .ai_models.NN import recommend_books_nn
+from .ai_models.Genre_Based import recommend_books_by_genre
+from .ai_models.knn_genre import recommend_books_by_knn_genre
 
 
 class CustomLimitOffsetPagination(LimitOffsetPagination):
@@ -56,7 +58,9 @@ class BookSearchView(generics.ListAPIView):
     
 
 class BookRecommendationView(APIView):
-      def post(self, request):
+    permission_classes = [IsAuthenticated]
+    
+    def post(self, request):
         serializer = BookRecommendationRequestSerializer(data=request.data)
         if serializer.is_valid():
             book_title = serializer.validated_data['book_title']
@@ -73,6 +77,10 @@ class BookRecommendationView(APIView):
                 results = recommend_books_knn(book_titles, num_recommendations)
             elif model_used == 'NN':
                 results = recommend_books_nn(book_titles, num_recommendations)
+            elif model_used == 'Genre-Based':
+                results = recommend_books_by_genre(book_titles, num_recommendations)
+            elif model_used == 'knn_genre':
+                results = recommend_books_by_knn_genre(book_titles, num_recommendations)
             else:
                 return Response(
                     {"error": f"Model '{model_used}' is not supported."},
@@ -82,18 +90,10 @@ class BookRecommendationView(APIView):
             if save_history:
                 for input_title, recommended in results.items():
                     if isinstance(recommended, list):
-                        # Convert book objects to a format suitable for storage
-                        recommended_data = []
-                        for book in recommended:
-                            if isinstance(book, dict):
-                                recommended_data.append(book)
-                            else:
-                                # Handle old string format for backward compatibility
-                                recommended_data.append({"title": str(book), "author": "Unknown"})                        
                         BookRecommendationHistory.objects.create(
                             user=request.user if request.user.is_authenticated else None,
                             input_title=input_title,
-                            recommended_titles=recommended_data,
+                            recommended_titles=recommended,
                             model_used=model_used
                         )
 
@@ -109,6 +109,8 @@ class BookRecommendationView(APIView):
         
 
 class SaveSelectedRecommendations(APIView):
+    permission_classes = [IsAuthenticated]
+    
     def post(self, request):
         input_title = request.data.get('input_title')
         selected_recommendations = request.data.get('selected_recommendations', {})
@@ -121,8 +123,8 @@ class SaveSelectedRecommendations(APIView):
             for input_title, recommended_titles in selected_recommendations.items():
                 BookRecommendationHistory.objects.create(
                     user=request.user if request.user.is_authenticated else None,
-                    input_title= input_title, 
-                    recommended_titles=recommended_titles,  # Assuming this is a JSONField or TextField
+                    input_title=input_title, 
+                    recommended_titles=recommended_titles,  # Store the list of strings directly
                     model_used=model_used
                 )
 
@@ -213,3 +215,62 @@ class BookHistoryView(generics.ListAPIView):
     def get_queryset(self):
         """Return history entries for the authenticated user only"""
         return BookRecommendationHistory.objects.filter(user=self.request.user)
+    
+
+class GenreBasedRecommendationView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        """
+        Handle genre-based book recommendations
+        """
+        try:
+            genres = request.data.get('genres', [])
+            model = request.data.get('model', 'Genre-Based')
+            num_recommendations = request.data.get('num_recommendations', 10)
+            regenerate = request.data.get('regenerate', False)
+
+            if not genres:
+                return Response(
+                    {"error": "Please provide at least one genre."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            # For genre-based recommendations, we use the first genre as input
+            # and the model will find books with similar genres
+            primary_genre = genres[0]
+            
+            if model == 'Genre-Based':
+                results = recommend_books_by_genre([primary_genre], num_recommendations)
+            elif model == 'knn_genre':
+                results = recommend_books_by_knn_genre([primary_genre], num_recommendations, regenerate=regenerate)
+            else:
+                return Response(
+                    {"error": f"Model '{model}' is not supported for genre-based recommendations."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            # Format the response for the frontend
+            recommendations = []
+            for genre, books in results.items():
+                if isinstance(books, list):
+                    for book_title in books:
+                        recommendations.append({
+                            'title': book_title,
+                            'author': 'Unknown Author',  # Can be enhanced if author data is available
+                            'genre': genre
+                        })
+
+            return Response({
+                "recommendations": recommendations,
+                "model_used": model,
+                "selected_genres": genres,
+                "total_recommendations": len(recommendations),
+                "regenerated": regenerate
+            }, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            return Response(
+                {"error": f"An error occurred: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
