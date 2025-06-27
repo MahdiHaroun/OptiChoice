@@ -50,3 +50,30 @@ class BookSerializer(serializers.ModelSerializer):
     class Meta:
         model = Book
         fields = ['book_id', 'title', 'authors', 'description', 'category']
+
+
+class BookRecommendationUserGenreSerializer(serializers.Serializer):
+    Model_Choices = [
+            ('Genre-Based', 'Genre-Based'),
+            
+        ]
+    book_genres = serializers.ListField(
+            child=serializers.CharField(),
+            allow_empty=False,
+            help_text="List of input book genres"
+        )
+    num_recommendations = serializers.IntegerField(
+            min_value=1,
+            default=5,
+            help_text="Number of recommendations to return"
+        )
+    model_used = serializers.ChoiceField(
+            choices=Model_Choices,
+            required=True,
+            help_text="Recommendation model to use"
+        )
+    regenerate = serializers.BooleanField(
+            required=False,
+            default=False,
+            help_text="Whether this request is a regeneration"
+        )

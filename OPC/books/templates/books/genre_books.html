@@ -418,45 +418,65 @@
 .loading-spinner {
     margin: 2rem auto;
     position: relative;
-    width: 80px;
-    height: 80px;
-}
-
-.spinner-ring {
-    display: inline-block;
-    width: 80px;
-    height: 80px;
-    border: 4px solid transparent;
-    border-top: 4px solid #6a11cb;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+    width: 250px;
 }
 
 .progress-container {
-    width: 200px;
-    height: 6px;
-    background: rgba(99, 102, 241, 0.1);
-    border-radius: 3px;
-    margin: 0 auto 1rem;
+    width: 100%;
+    height: 8px;
+    background: rgba(99, 102, 241, 0.2);
+    border-radius: 4px;
     overflow: hidden;
+    position: relative;
+    margin: 1rem auto;
 }
 
 .progress-bar {
     height: 100%;
-    background: var(--gradient-primary);
-    border-radius: 3px;
-    animation: progress 2s ease-in-out infinite;
+    background: linear-gradient(90deg, rgba(99,102,241,0.8), #6366f1, rgba(99,102,241,0.8));
+    border-radius: 4px;
+    width: 0%;
+    animation: progressLoad 3s ease-in-out infinite;
+    position: relative;
 }
 
-@keyframes progress {
+.progress-bar::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent);
+    animation: progressShine 1.5s ease-in-out infinite;
+}
+
+@keyframes progressLoad {
     0% { width: 0%; }
-    50% { width: 70%; }
-    100% { width: 100%; }
+    25% { width: 30%; }
+    50% { width: 60%; }
+    75% { width: 85%; }
+    100% { width: 95%; }
+}
+
+@keyframes progressShine {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+.progress-text {
+    font-size: 0.85rem;
+    opacity: 0.9;
+    margin-top: 0.5rem;
+    color: var(--text-secondary);
+    animation: progressTextCycle 4s ease-in-out infinite;
+}
+
+@keyframes progressTextCycle {
+    0%, 25% { opacity: 0.9; }
+    12.5% { opacity: 1; }
+    75%, 100% { opacity: 0.7; }
+    87.5% { opacity: 1; }
 }
 
 .progress-text {
@@ -609,32 +629,6 @@
     margin-top: 1rem;
 }
 
-.book-select-checkbox {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    width: 24px;
-    height: 24px;
-    border: 2px solid white;
-    border-radius: 6px;
-    background: rgba(0, 0, 0, 0.3);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    transition: all 0.3s ease;
-    cursor: pointer;
-}
-
-.book-select-checkbox.checked {
-    background: var(--success);
-    border-color: var(--success);
-}
-
-.book-select-checkbox i {
-    font-size: 0.8rem;
-}
-
 /* Error Section */
 .error-section {
     display: none;
@@ -725,23 +719,6 @@
     .btn {
         justify-content: center;
     }
-}
-
-/* Success Message */
-.success-message {
-    background: #d4edda;
-    color: #155724;
-    padding: 1rem 1.5rem;
-    border-radius: 10px;
-    margin-bottom: 1.5rem;
-    border: 1px solid #c3e6cb;
-    display: none;
-}
-
-[data-theme="dark"] .success-message {
-    background: #1a4c37;
-    color: #9ae6b4;
-    border-color: #2d7748;
 }
 
 /* Dark theme adjustments for book cards */
@@ -1219,10 +1196,11 @@
     <div class="card loading-section" id="loading-section" style="display: none;">
         <div class="card-body loading-card">
             <div class="loading-spinner">
-                <div class="spinner-ring"></div>
+                <div class="progress-container"><div class="progress-bar"></div></div>
+                <div class="progress-text">Analyzing your preferences...</div>
             </div>
             <h4 class="loading-title">Finding Perfect Books</h4>
-            <p class="loading-text">Analyzing genres and selecting the best recommendations for you...</p>
+            <p class="loading-text">Using AI to discover books you'll love...</p>
         </div>
     </div>
     
@@ -1235,18 +1213,9 @@
                     <div id="recommendation-info" class="recommendation-info"></div>
                 </div>
                 <div class="results-actions">
-                    <button id="select-all-btn" class="btn btn-outline-primary" style="display: none;">
-                        <i class="fas fa-check-double"></i> Select All
-                    </button>
-                    <button id="save-selected-btn" class="btn btn-success" style="display: none;">
-                        <i class="fas fa-save"></i> Save (<span id="selected-count">0</span>)
-                    </button>
                 </div>
             </div>
             <div class="card-body">
-                <div id="success-message" class="success-message">
-                    <i class="fas fa-check-circle"></i> Recommendations saved successfully!
-                </div>
                 <div id="recommendations-grid" class="recommendations-grid"></div>
             </div>
         </div>
@@ -1330,20 +1299,21 @@ document.addEventListener('DOMContentLoaded', function() {
                 const bookCard = document.createElement('div');
                 bookCard.className = 'book-card';
                 bookCard.setAttribute('data-book-index', index);
+                
+                // Handle both string format (like movies) and object format
+                const bookTitle = typeof book === 'string' ? book : book.title;
+                const bookAuthor = typeof book === 'string' ? 'Unknown Author' : (book.author || 'Unknown Author');
+                
                 bookCard.innerHTML = `
                     <div class="book-cover">
-                        <div class="book-select-checkbox" onclick="toggleBookSelection(${index}, event)">
-                            <i class="fas fa-check" style="display: none;"></i>
-                        </div>
                         📚
                     </div>
                     <div class="book-info">
-                        <h4 class="book-title">${book.title}</h4>
-                        <p class="book-author">by ${book.author || 'Unknown Author'}</p>
-                        ${book.description ? `<p class="book-description">${book.description}</p>` : ''}
+                        <h4 class="book-title">${bookTitle}</h4>
+                        <p class="book-author">by ${bookAuthor}</p>
                         <div class="input-source">
                             <i class="fas fa-tags"></i>
-                            Genre-based recommendation (${data.model_used || 'Genre-Based'} model)
+                            Genre-based recommendation (GRHR model)
                         </div>
                     </div>
                 `;
@@ -1356,10 +1326,6 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Show regenerate button
         regenerateBtn.style.display = 'inline-flex';
-        
-        // Reset selections and update button states
-        selectedBooks.clear();
-        updateSelectedCount();
     }
 
     function getRecommendations() {
@@ -1376,16 +1342,17 @@ document.addEventListener('DOMContentLoaded', function() {
         showLoading();
 
         // Make AJAX request to get genre-based recommendations
-        fetch('/api/books/genre-recommendations/', {
+        fetch('/books/api/genre-recommendations/', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'X-CSRFToken': getCSRFToken()
             },
             body: JSON.stringify({
-                genres: selectedGenres,
-                model: modelUsed,
+                book_genres: selectedGenres,
                 num_recommendations: numRecommendations,
+                model_used: 'Genre-Based',
+                save_history: false,
                 regenerate: false
             })
         })
@@ -1413,16 +1380,17 @@ document.addEventListener('DOMContentLoaded', function() {
         showLoading();
 
         // Make AJAX request to get genre-based recommendations
-        fetch('/api/books/genre-recommendations/', {
+        fetch('/books/api/genre-recommendations/', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'X-CSRFToken': getCSRFToken()
             },
             body: JSON.stringify({
-                genres: selectedGenres,
-                model: modelUsed,
+                book_genres: selectedGenres,
                 num_recommendations: numRecommendations,
+                model_used: 'Genre-Based',
+                save_history: false,
                 regenerate: true
             })
         })
@@ -1440,17 +1408,6 @@ document.addEventListener('DOMContentLoaded', function() {
     getRecommendationsBtn.addEventListener('click', getRecommendations);
     regenerateBtn.addEventListener('click', regenerateRecommendations);
     
-    // Add event listeners for selection buttons
-    const selectAllBtn = document.getElementById('select-all-btn');
-    const saveSelectedBtn = document.getElementById('save-selected-btn');
-    
-    if (selectAllBtn) {
-        selectAllBtn.addEventListener('click', selectAllBooks);
-    }
-    if (saveSelectedBtn) {
-        saveSelectedBtn.addEventListener('click', saveSelectedBooks);
-    }
-
     // Add click handlers for genre items
     document.querySelectorAll('.genre-item').forEach(item => {
         item.addEventListener('click', function(e) {
@@ -1490,99 +1447,8 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
-// Global variables for book selection functionality
-let selectedBooks = new Set();
+// Global variables
 let recommendationData = null;
-
-function toggleBookSelection(index, event) {
-    if (event) {
-        event.stopPropagation();
-    }
-    
-    const card = document.querySelector(`[data-book-index="${index}"]`);
-    if (!card) return;
-    
-    const checkbox = card.querySelector('.book-select-checkbox');
-    const checkIcon = checkbox.querySelector('i');
-    
-    if (selectedBooks.has(index)) {
-        selectedBooks.delete(index);
-        card.classList.remove('selected');
-        checkbox.classList.remove('checked');
-        checkIcon.style.display = 'none';
-    } else {
-        selectedBooks.add(index);
-        card.classList.add('selected');
-        checkbox.classList.add('checked');
-        checkIcon.style.display = 'block';
-    }
-    
-    updateSelectedCount();
-}
-
-function updateSelectedCount() {
-    const selectedCount = document.getElementById('selected-count');
-    const selectAllBtn = document.getElementById('select-all-btn');
-    const saveSelectedBtn = document.getElementById('save-selected-btn');
-    
-    if (selectedCount) {
-        selectedCount.textContent = selectedBooks.size;
-    }
-    
-    // Show/hide buttons based on whether there are recommendations and selections
-    const hasRecommendations = document.querySelectorAll('.book-card').length > 0;
-    const hasSelections = selectedBooks.size > 0;
-    
-    if (selectAllBtn) {
-        selectAllBtn.style.display = hasRecommendations ? 'inline-flex' : 'none';
-    }
-    if (saveSelectedBtn) {
-        saveSelectedBtn.style.display = hasSelections ? 'inline-flex' : 'none';
-    }
-}
-
-function selectAllBooks() {
-    const bookCards = document.querySelectorAll('.book-card[data-book-index]');
-    bookCards.forEach(card => {
-        const index = parseInt(card.getAttribute('data-book-index'));
-        if (!selectedBooks.has(index)) {
-            selectedBooks.add(index);
-            card.classList.add('selected');
-            const checkbox = card.querySelector('.book-select-checkbox');
-            const checkIcon = checkbox.querySelector('i');
-            checkbox.classList.add('checked');
-            checkIcon.style.display = 'block';
-        }
-    });
-    updateSelectedCount();
-}
-
-function saveSelectedBooks() {
-    if (selectedBooks.size === 0) {
-        alert('Please select at least one book to save.');
-        return;
-    }
-    
-    // Show success message
-    const successMessage = document.getElementById('success-message');
-    if (successMessage) {
-        successMessage.style.display = 'block';
-        setTimeout(() => {
-            successMessage.style.display = 'none';
-        }, 3000);
-    }
-    
-    // Clear selections
-    selectedBooks.clear();
-    document.querySelectorAll('.book-card').forEach(card => {
-        card.classList.remove('selected');
-        const checkbox = card.querySelector('.book-select-checkbox');
-        const checkIcon = checkbox.querySelector('i');
-        checkbox.classList.remove('checked');
-        checkIcon.style.display = 'none';
-    });
-    updateSelectedCount();
-}
 
 // CSRF Token utility
 function getCookie(name) {
@@ -1620,10 +1486,6 @@ function resetForm() {
     
     // Hide regenerate button
     document.getElementById('regenerate-recommendations').style.display = 'none';
-    
-    // Clear selections
-    selectedBooks.clear();
-    updateSelectedCount();
 }
 </script>
 

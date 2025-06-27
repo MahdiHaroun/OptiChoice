@@ -238,6 +238,11 @@ SESSION_COOKIE_AGE = get_env('SESSION_COOKIE_AGE', 1209600, cast=int)
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 SESSION_SAVE_EVERY_REQUEST = True
 
+# Authentication Settings
+LOGIN_URL = '/login/'
+LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/'
+
 # CORS Configuration (for React frontend)
 CORS_ALLOWED_ORIGINS = get_env('CORS_ALLOWED_ORIGINS', 'http://localhost:3000,http://127.0.0.1:3000', cast=list)
 CORS_ALLOW_CREDENTIALS = get_env('CORS_ALLOW_CREDENTIALS', True, cast=bool)
