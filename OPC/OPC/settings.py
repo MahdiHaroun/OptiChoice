@@ -73,6 +73,7 @@ INSTALLED_APPS = [
     'authentication',
     'movies',
     'books',
+    'courses',
 ]
 
 MIDDLEWARE = [

@@ -13,7 +13,7 @@ class Movie(models.Model):
 
 
 class RecommendationHistory(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True )
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True, related_name='movie_recommendation_history')
     input_title = models.CharField(max_length=255)
     recommended_titles = models.JSONField()
     model_used = models.CharField(max_length=100)

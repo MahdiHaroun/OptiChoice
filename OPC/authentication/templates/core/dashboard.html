@@ -18,7 +18,7 @@
             <h3>🎬 Movies</h3>
             <p>Discover new movies based on your preferences using our advanced AI recommendation models.</p>
             <a href="{% url 'movie_recommendation_page' %}" class="btn btn-secondary">Start Exploring</a>
-            <a href="{% url 'recommendation_history_page' %}" class="btn btn-secondary">Watch List</a>
+            <a href="{% url 'movie_recommendation_history_page' %}" class="btn btn-secondary">Watch List</a>
         </div>
           <div class="card card-books">
             <h3>📚 Books</h3>
@@ -30,7 +30,8 @@
         <div class="card card-courses">
             <h3>🎓 Courses</h3>
             <p>Enhance your skills with curated course recommendations based on your learning goals.</p>
-            <a href="#" class="btn btn-secondary">Find Courses</a>
+            <a href="{% url 'course_recommendation_page' %}" class="btn btn-secondary">Find Courses</a>
+            <a href="{% url 'course_recommendation_history_page' %}" class="btn btn-secondary">Course History</a>
         </div>
     </div>
     

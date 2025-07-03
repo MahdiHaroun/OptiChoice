@@ -24,6 +24,7 @@ urlpatterns = [
     path('', include('authentication.urls')),  # Authentication URLs
     path('', include('movies.urls')),  # Movies URLs
     path('books/', include('books.urls')),  # Books URLs with prefix
+    path('courses/', include('courses.urls')),  # Courses URLs with prefix
 ]
 
 # Serve static files during development

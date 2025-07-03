@@ -4,8 +4,8 @@ from . import views
 urlpatterns = [
     # Movie recommendation pages
     path('movies/', views.movie_recommendation_page, name='movie_recommendation_page'),
-    path('genre-movies/', views.genre_recommendation_page, name='genre_recommendation_page'),
-    path('history/', views.recommendation_history_page, name='recommendation_history_page'),
+    path('genre-movies/', views.genre_recommendation_page, name='movie_genre_recommendation_page'),
+    path('history/', views.recommendation_history_page, name='movie_recommendation_history_page'),
       # API endpoints
     path('api/movies/search/', views.MovieSearchView.as_view(), name='movie_search'),
     path('api/movies/recommend/', views.MovieRecommendation_1.as_view(), name='movie_recommend'),
