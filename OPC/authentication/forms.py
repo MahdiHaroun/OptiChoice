@@ -76,6 +76,40 @@ class usernameRecoveryForm(forms.Form):
     )
 
 
+class AccountDeletionForm(forms.Form):
+    email = forms.EmailField(
+        widget=forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'Email'}),
+        error_messages={'required': 'Email is required.'}
+    )
+    
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None)
+        super().__init__(*args, **kwargs)
+    
+    def clean_email(self):
+        email = self.cleaned_data['email']
+        if self.user and self.user.email != email:
+            raise forms.ValidationError("Email must match your account email.")
+        return email
+
+
+class AccountDeletionConfirmationForm(forms.Form):
+    confirm_deletion = forms.CharField(
+        max_length=100,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control', 
+            'placeholder': 'Type "DELETE" to confirm'
+        }),
+        error_messages={'required': 'Please type "DELETE" to confirm account deletion.'}
+    )
+    
+    def clean_confirm_deletion(self):
+        confirm_text = self.cleaned_data['confirm_deletion']
+        if confirm_text != "DELETE":
+            raise forms.ValidationError('Please type "DELETE" exactly to confirm account deletion.')
+        return confirm_text
+
+
     
  
 

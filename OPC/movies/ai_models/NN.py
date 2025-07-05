@@ -1,6 +1,7 @@
 import os
 import joblib
 import numpy as np
+import random
 from tensorflow.keras.models import load_model
 from django.conf import settings
 from sklearn.metrics.pairwise import cosine_similarity
@@ -22,6 +23,10 @@ def recommend_movies_nn(movie_titles, top_k=10):
     Returns:
         Dictionary with input titles as keys and recommendation lists as values
     """
+    # Reset random seed for different results each time
+    import time
+    random.seed(int(time.time()))
+    
     if isinstance(movie_titles, str):
         movie_titles = [movie_titles]
     
@@ -55,15 +60,27 @@ def recommend_movies_nn(movie_titles, top_k=10):
         input_features = input_features.reshape(1, -1)
         similarities = cosine_similarity(input_features, all_features)[0]
         
+        # Add small random noise to similarities for variety (without destroying ranking too much)
+        noise = np.random.randn(len(similarities)) * 0.01  # Small random noise
+        similarities = similarities + noise
+        
         # Exclude the input movie itself
         input_index = movie_match.index[0]
         similarities[input_index] = -1
         
-        # Get top-k most similar movies
-        top_indices = np.argsort(similarities)[::-1][:top_k]
+        # Get more candidates than requested for randomization
+        search_k = min(top_k * 3, len(movies_data))  # Get 3x more results or all available
+        top_indices = np.argsort(similarities)[::-1][:search_k]
         
-        # Extract movie titles
-        recommendations = movies_data.iloc[top_indices]['title'].tolist()
+        # Extract movie titles from candidates
+        candidate_recommendations = movies_data.iloc[top_indices]['title'].tolist()
+        
+        # Randomly shuffle and select the requested number of recommendations
+        if len(candidate_recommendations) > top_k:
+            random.shuffle(candidate_recommendations)
+            recommendations = candidate_recommendations[:top_k]
+        else:
+            recommendations = candidate_recommendations
         
         results[title] = recommendations
     

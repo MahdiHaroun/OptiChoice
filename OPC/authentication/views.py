@@ -8,7 +8,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 from django.contrib.auth.tokens import default_token_generator
 from django.db.models import Q
-from .forms import LoginForm , RegistrationForm , PasswordResetForm , usernameRecoveryForm 
+from .forms import LoginForm , RegistrationForm , PasswordResetForm , usernameRecoveryForm, AccountDeletionForm, AccountDeletionConfirmationForm 
 from .utility import get_jwt_tokens
 
 
@@ -447,15 +447,110 @@ def profile_view(request):
 
 @login_required
 def delete_account_view(request):
-    """Handle account deletion with proper confirmation."""
+    """Handle account deletion request with email confirmation."""
     if request.method == 'POST':
-        try:
-            user = request.user
-            username = user.username
-            
-            # Send confirmation email before deletion
-            subject = 'OptiChoice Account Deleted'
-            message = f"""Hi {username},
+        form = AccountDeletionForm(request.POST, user=request.user)
+        if form.is_valid():
+            try:
+                user = request.user
+                
+                # Update timestamp for account deletion request
+                user_profile, created = UserProfile.objects.get_or_create(user=user)
+                user_profile.account_deletion_sent_at = timezone.now()
+                user_profile.save()
+                
+                # Create account deletion confirmation URL
+                deletion_url = f"http://127.0.0.1:8000/delete-account-confirm/{user.pk}/{default_token_generator.make_token(user)}/"
+                
+                # Send account deletion confirmation email
+                subject = 'Confirm Account Deletion - OptiChoice'
+                message = f"""Hi {user.username},
+
+We received a request to delete your OptiChoice account.
+
+⚠️ WARNING: This action cannot be undone! ⚠️
+
+If you proceed, the following data will be permanently deleted:
+• Your profile information
+• All saved recommendations
+• Your activity history
+• Personal preferences
+• All associated data
+
+Click the link below to confirm account deletion:
+
+{deletion_url}
+
+This link will expire in 1 hour for security.
+
+If you did not request this account deletion, please ignore this email and your account will remain active.
+
+Need help? Contact our support team.
+
+Best regards,
+The OptiChoice Team"""
+                
+                send_mail(
+                    subject,
+                    message,
+                    settings.DEFAULT_FROM_EMAIL,
+                    [user.email],
+                    fail_silently=False,
+                )
+                
+                messages.success(request, 
+                    'Account deletion confirmation email has been sent to your email address. Please check your inbox.')
+                return redirect('profile')
+                
+            except Exception as e:
+                print(f"Account deletion request error: {e}")
+                messages.error(request, 'An error occurred. Please try again.')
+                return render(request, 'authen/delete_account.html', {'form': form})
+    
+    else:
+        form = AccountDeletionForm(user=request.user)
+    
+    return render(request, 'authen/delete_account.html', {'form': form})
+
+
+@login_required
+def delete_account_confirm_view(request, uid, token):
+    """Handle account deletion confirmation."""
+    try:
+        user = get_object_or_404(User, pk=uid)
+        
+        # Verify user is the current logged-in user
+        if user != request.user:
+            messages.error(request, 'You can only delete your own account.')
+            return redirect('profile')
+
+        # Verify Django's built-in token (this handles expiration automatically)
+        if not default_token_generator.check_token(user, token):
+            messages.error(request, 'Invalid or expired account deletion link.')
+            return redirect('profile')
+        
+        # Get user profile
+        user_profile, created = UserProfile.objects.get_or_create(user=user)
+        
+        # Check if the deletion request is still valid (within 1 hour)
+        if not user_profile.is_account_deletion_valid():
+            messages.error(request, 'Account deletion request has expired. Please try again.')
+            return redirect('profile')
+
+        if request.method == 'POST':
+            form = AccountDeletionConfirmationForm(request.POST)
+            if form.is_valid():
+                try:
+                    username = user.username
+                    user_email = user.email
+                    
+                    # Clear deletion timestamp
+                    user_profile.account_deletion_sent_at = None
+                    user_profile.save()
+                    
+                    # Send final confirmation email before deletion
+                    subject = 'OptiChoice Account Deleted'
+                    message = f"""Hi {username},
 
 Your OptiChoice account has been successfully deleted.
 
@@ -471,36 +566,43 @@ Thank you for being part of OptiChoice. We're sorry to see you go.
 
 Best regards,
 The OptiChoice Team"""
-            
-            # Send email before deleting user
-            send_mail(
-                subject,
-                message,
-                settings.DEFAULT_FROM_EMAIL,
-                [user.email],
-                fail_silently=True,  # Don't fail if email doesn't send
-            )
-            
-            # Log out the user first
-            logout(request)
-            
-            # Delete the user (this also deletes the related UserProfile due to CASCADE)
-            user.delete()
-            
-            # Show success message and redirect to home
-            messages.success(
-                request, 
-                f'Account "{username}" has been permanently deleted. We\'re sorry to see you go!'
-            )
-            return redirect('home')
-            
-        except Exception as e:
-            print(f"Account deletion error: {e}")
-            messages.error(request, 'An error occurred while deleting your account. Please try again.')
-            return redirect('profile')
-    
-    # If not POST request, redirect to profile
-    return redirect('profile')
+                    
+                    # Send email before deleting user
+                    send_mail(
+                        subject,
+                        message,
+                        settings.DEFAULT_FROM_EMAIL,
+                        [user_email],
+                        fail_silently=True,  # Don't fail if email doesn't send
+                    )
+                    
+                    # Log out the user first
+                    logout(request)
+                    
+                    # Delete the user (this also deletes the related UserProfile due to CASCADE)
+                    user.delete()
+                    
+                    # Show success message and redirect to home
+                    messages.success(
+                        request, 
+                        f'Account "{username}" has been permanently deleted. We\'re sorry to see you go!'
+                    )
+                    return redirect('home')
+                    
+                except Exception as e:
+                    print(f"Account deletion confirmation error: {e}")
+                    messages.error(request, 'An error occurred while deleting your account. Please try again.')
+                    return render(request, 'authen/delete_account_confirm.html', {'uid': uid, 'token': token, 'form': form})
+        
+        else:
+            form = AccountDeletionConfirmationForm()
+        
+        return render(request, 'authen/delete_account_confirm.html', {'uid': uid, 'token': token, 'form': form})
+        
+    except Exception as e:
+        print(f"Account deletion confirmation error: {e}")
+        messages.error(request, 'An error occurred. Please try again.')
+        return redirect('profile')
 
 
 

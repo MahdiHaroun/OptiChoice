@@ -11,6 +11,7 @@ class UserProfile(models.Model):
     email_verified = models.BooleanField(default=False)
     email_verification_sent_at = models.DateTimeField(null=True, blank=True)
     password_reset_sent_at = models.DateTimeField(null=True, blank=True)
+    account_deletion_sent_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -28,3 +29,9 @@ class UserProfile(models.Model):
         if not self.password_reset_sent_at:
             return False
         return (timezone.now() - self.password_reset_sent_at).total_seconds() < 86400  # 24 hours validity
+
+    def is_account_deletion_valid(self):
+        # Check if the account deletion token is still valid
+        if not self.account_deletion_sent_at:
+            return False
+        return (timezone.now() - self.account_deletion_sent_at).total_seconds() < 3600  # 1 hour validity

@@ -58,13 +58,13 @@
                     </div>
                 </a>
                 
-                <button onclick="confirmDeleteAccount()" class="action-btn delete-account">
+                <a href="{% url 'delete_account' %}" class="action-btn delete-account">
                     <div class="action-icon">🗑️</div>
                     <div class="action-text">
                         <h3>Delete Account</h3>
                         <p>Permanently delete your account</p>
                     </div>
-                </button>
+                </a>
             </div>
         </div>
 
@@ -87,38 +87,6 @@
         </div>
     </div>
 </div>
-
-<!-- Hidden form for account deletion -->
-<form id="deleteAccountForm" method="post" action="{% url 'delete_account' %}" style="display: none;">
-    {% csrf_token %}
-</form>
-
-<script>
-function confirmDeleteAccount() {
-    const confirmation = confirm(
-        "⚠️ WARNING: This action cannot be undone!\n\n" +
-        "Are you absolutely sure you want to delete your account?\n\n" +
-        "This will permanently delete:\n" +
-        "• Your profile and personal information\n" +
-        "• All your saved recommendations\n" +
-        "• Your activity history\n" +
-        "• All associated data\n\n" +
-        "Type 'DELETE' in the next prompt to confirm."
-    );
-    
-    if (confirmation) {
-        const finalConfirmation = prompt(
-            "To confirm account deletion, please type 'DELETE' (case sensitive):"
-        );
-        
-        if (finalConfirmation === 'DELETE') {
-            document.getElementById('deleteAccountForm').submit();
-        } else if (finalConfirmation !== null) {
-            alert("Deletion cancelled. You must type 'DELETE' exactly to confirm.");
-        }
-    }
-}
-</script>
 
 <style>
 .profile-container {
