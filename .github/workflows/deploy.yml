@@ -77,28 +77,42 @@ jobs:
           docker rmi opc/django:latest || true
           df -h
 
-      - name: Upload Docker image
-        uses: appleboy/scp-action@v0.1.6
+      - name: Upload Docker image and configuration files
+        uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.DROPLET_HOST }}
           username: ${{ secrets.DROPLET_USERNAME }}
           password: ${{ secrets.DROPLET_PASSWORD }}
           port: 22
-          source: "./artifacts/django.tar.gz"
-          target: "/opt/opc/"
           timeout: 300s
+          command_timeout: 300s
+          script: |
+            # Create directory if it doesn't exist
+            mkdir -p /opt/opc
 
-      - name: Upload configuration files
-        uses: appleboy/scp-action@v0.1.6
-        with:
-          host: ${{ secrets.DROPLET_HOST }}
-          username: ${{ secrets.DROPLET_USERNAME }}
-          password: ${{ secrets.DROPLET_PASSWORD }}
-          port: 22
-          source: "OPC/docker-compose.prod.yml,nginx.conf,.env.production"
-          target: "/opt/opc/"
-          timeout: 60s
-          overwrite: true
+      - name: Upload files using rsync over SSH
+        run: |
+          # Install sshpass for password authentication
+          sudo apt-get update
+          sudo apt-get install -y sshpass rsync
+
+          # Upload Docker image
+          echo "Uploading Docker image..."
+          sshpass -p '${{ secrets.DROPLET_PASSWORD }}' rsync -avz --progress -e "ssh -o StrictHostKeyChecking=no -p 22" \
+            ./artifacts/django.tar.gz ${{ secrets.DROPLET_USERNAME }}@${{ secrets.DROPLET_HOST }}:/opt/opc/
+
+          # Upload configuration files
+          echo "Uploading configuration files..."
+          sshpass -p '${{ secrets.DROPLET_PASSWORD }}' rsync -avz --progress -e "ssh -o StrictHostKeyChecking=no -p 22" \
+            OPC/docker-compose.prod.yml ${{ secrets.DROPLET_USERNAME }}@${{ secrets.DROPLET_HOST }}:/opt/opc/
+
+          sshpass -p '${{ secrets.DROPLET_PASSWORD }}' rsync -avz --progress -e "ssh -o StrictHostKeyChecking=no -p 22" \
+            nginx.conf ${{ secrets.DROPLET_USERNAME }}@${{ secrets.DROPLET_HOST }}:/opt/opc/
+
+          sshpass -p '${{ secrets.DROPLET_PASSWORD }}' rsync -avz --progress -e "ssh -o StrictHostKeyChecking=no -p 22" \
+            .env.production ${{ secrets.DROPLET_USERNAME }}@${{ secrets.DROPLET_HOST }}:/opt/opc/
+
+          echo "File upload completed!"
 
       - name: Deploy
         uses: appleboy/ssh-action@v1.0.3
@@ -139,12 +153,12 @@ jobs:
 
             if [ "${{ github.event.inputs.full_deploy }}" == "true" ]; then
               echo "Performing full deployment..."
-              docker-compose -f /opt/opc/OPC/docker-compose.prod.yml down
-              docker-compose -f /opt/opc/OPC/docker-compose.prod.yml up -d
+              docker-compose -f /opt/opc/docker-compose.prod.yml down
+              docker-compose -f /opt/opc/docker-compose.prod.yml up -d
             else
               echo "Performing targeted deployment..."
-              docker-compose -f /opt/opc/OPC/docker-compose.prod.yml up -d --no-deps web
-              docker-compose -f /opt/opc/OPC/docker-compose.prod.yml up -d --no-deps nginx
+              docker-compose -f /opt/opc/docker-compose.prod.yml up -d --no-deps web
+              docker-compose -f /opt/opc/docker-compose.prod.yml up -d --no-deps nginx
             fi
 
             rm -f /opt/opc/django.tar.gz
