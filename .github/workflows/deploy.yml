@@ -91,7 +91,7 @@ jobs:
 
       # Upload the built image to droplet
       - name: Upload Docker image
-        uses: appleboy/scp-action@v0.1.7
+        uses: appleboy/scp-action@v0.1.4
         with:
           host: ${{ secrets.DROPLET_HOST }}
           username: ${{ secrets.DROPLET_USERNAME }}
@@ -100,11 +100,10 @@ jobs:
           source: "./artifacts/django.tar.gz"
           target: "/opt/opc/"
           timeout: 300s
-          command_timeout: 300s
 
       # Upload configuration files
       - name: Upload configuration files
-        uses: appleboy/scp-action@v0.1.7
+        uses: appleboy/scp-action@v0.1.4
         with:
           host: ${{ secrets.DROPLET_HOST }}
           username: ${{ secrets.DROPLET_USERNAME }}
