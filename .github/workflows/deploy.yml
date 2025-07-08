@@ -44,37 +44,29 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      # Free up disk space on GitHub runner
       - name: Free up disk space
         run: |
           echo "Disk space before cleanup:"
           df -h
-
-          # Remove unnecessary packages and files
           sudo apt-get clean
           sudo rm -rf /usr/share/dotnet
           sudo rm -rf /usr/local/lib/android
           sudo rm -rf /opt/ghc
           sudo rm -rf /opt/hostedtoolcache/CodeQL
           sudo docker system prune -af
-
           echo "Disk space after cleanup:"
           df -h
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
 
-      # Create artifacts directory
       - name: Create artifacts directory
         run: mkdir -p ./artifacts
 
-      # Build Docker image
       - name: Build Django image
         run: |
           echo "Building Django image..."
           docker build -t opc/django:latest -f OPC/Dockerfile OPC/
-
-          # Clean up intermediate layers to save space
           docker system prune -f
 
       - name: Save Docker image to file (compressed)
@@ -82,16 +74,11 @@ jobs:
           echo "Saving and compressing Docker image..."
           docker save opc/django:latest | gzip > ./artifacts/django.tar.gz
           ls -la ./artifacts/
-
-          # Remove the Docker image from local cache to free up space
           docker rmi opc/django:latest || true
-
-          # Show disk usage
           df -h
 
-      # Upload the built image to droplet
       - name: Upload Docker image
-        uses: appleboy/scp-action@v0.1.4
+        uses: appleboy/scp-action@v0.1.6
         with:
           host: ${{ secrets.DROPLET_HOST }}
           username: ${{ secrets.DROPLET_USERNAME }}
@@ -101,9 +88,8 @@ jobs:
           target: "/opt/opc/"
           timeout: 300s
 
-      # Upload configuration files
       - name: Upload configuration files
-        uses: appleboy/scp-action@v0.1.4
+        uses: appleboy/scp-action@v0.1.6
         with:
           host: ${{ secrets.DROPLET_HOST }}
           username: ${{ secrets.DROPLET_USERNAME }}
@@ -114,7 +100,6 @@ jobs:
           timeout: 60s
           overwrite: true
 
-      # Deploy image
       - name: Deploy
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -125,33 +110,22 @@ jobs:
           timeout: 300s
           command_timeout: 300s
           script: |
-            # Check Docker installation
             if ! command -v docker &> /dev/null; then
               echo "Docker not found, installing..."
-              # Update package lists
               apt-get update
-              
-              # Install requirements
               apt-get install -y \
                 apt-transport-https \
                 ca-certificates \
                 curl \
                 gnupg \
                 lsb-release
-                
-              # Add Docker's official GPG key
               curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
-              
-              # Set up Docker repository
               echo "deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
-              
-              # Install Docker
               apt-get update
               apt-get install -y docker-ce docker-ce-cli containerd.io
               echo "Docker installed successfully"
             fi
 
-            # Check Docker Compose installation
             if ! command -v docker-compose &> /dev/null; then
               echo "Docker Compose not found, installing..."
               curl -L "https://github.com/docker/compose/releases/download/v2.20.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
@@ -159,31 +133,23 @@ jobs:
               echo "Docker Compose installed successfully"
             fi
 
-            # Navigate to app directory
             cd /opt/opc
-
-            # Load Docker image (decompress first)
             echo "Loading Docker image..."
             gunzip -c /opt/opc/django.tar.gz | docker load
 
             if [ "${{ github.event.inputs.full_deploy }}" == "true" ]; then
-              # Full deployment - restart everything
               echo "Performing full deployment..."
               docker-compose -f /opt/opc/OPC/docker-compose.prod.yml down
               docker-compose -f /opt/opc/OPC/docker-compose.prod.yml up -d
             else
-              # Targeted deployment - only restart Django container
               echo "Performing targeted deployment..."
               docker-compose -f /opt/opc/OPC/docker-compose.prod.yml up -d --no-deps web
               docker-compose -f /opt/opc/OPC/docker-compose.prod.yml up -d --no-deps nginx
             fi
 
-            # Clean up tar files on server
             rm -f /opt/opc/django.tar.gz
-
             echo "Deployment complete!"
 
-      # Clean up artifacts from GitHub runner
       - name: Clean up artifacts
         if: always()
         run: |
