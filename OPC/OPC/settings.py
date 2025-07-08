@@ -160,15 +160,17 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = get_env('STATIC_URL', '/static/')
+STATIC_ROOT = get_env('STATIC_ROOT', BASE_DIR / 'staticfiles')
 
 # Additional locations for static files
 STATICFILES_DIRS = [
     BASE_DIR / 'authentication' / 'static',
 ]
 
-# For production - where collected static files will be stored
-STATIC_ROOT = BASE_DIR / 'staticfiles'
+# Media files
+MEDIA_URL = get_env('MEDIA_URL', '/media/')
+MEDIA_ROOT = get_env('MEDIA_ROOT', BASE_DIR / 'media')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
