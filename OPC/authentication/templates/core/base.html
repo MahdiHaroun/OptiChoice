@@ -250,8 +250,13 @@
 
         /* Main content wrapper */
         .main-content {
-            padding-top: 80px; /* Space for top bar */
+            padding: 140px 40px 40px 40px; /* Increased top padding for top bar + navigation + extra space */
             min-height: calc(100vh - 80px);
+        }
+
+        /* Adjust main content when sidebar is open */
+        body.authenticated.sidebar-open .main-content {
+            margin-left: 0; /* Keep content full width, navigation handles the offset */
         }
 
         /* Theme Toggle Button */
@@ -420,11 +425,7 @@
             background: #c82333;
         }
 
-        /* Main Content */
-        .main-content {
-            padding: 40px;
-            min-height: calc(100vh - 80px);
-        }        /* Auth Forms */
+        /* Auth Forms */
         .auth-container {
             max-width: 400px;
             margin: 100px auto;
@@ -527,7 +528,123 @@
         .card p {
             color: var(--text-secondary);
             margin-bottom: 20px;
-        }        /* Responsive Design */
+        }        /* Top Navigation Buttons */
+        .top-navigation {
+            position: fixed;
+            top: 60px; /* Below the top bar */
+            left: 0;
+            right: 0;
+            background: rgba(240, 244, 248, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-color);
+            z-index: 999;
+            transition: all 0.3s ease;
+            padding: 0;
+        }
+
+        [data-theme="dark"] .top-navigation {
+            background: rgba(30, 30, 50, 0.95);
+        }
+
+        /* Adjust left position when sidebar is open */
+        body.authenticated.sidebar-open .top-navigation {
+            left: 250px;
+        }
+
+        .nav-buttons {
+            display: flex;
+            max-width: 1200px;
+            margin: 0 auto;
+            gap: 0;
+            padding: 0 20px;
+        }
+
+        .nav-btn {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            padding: 12px 16px;
+            text-decoration: none;
+            color: var(--navbar-text);
+            transition: all 0.3s ease;
+            border-bottom: 3px solid transparent;
+            background: transparent;
+            font-weight: 500;
+            position: relative;
+        }
+
+        .nav-btn:hover {
+            color: #6a11cb;
+            background: rgba(106, 17, 203, 0.05);
+            text-decoration: none;
+            transform: translateY(-1px);
+        }
+
+        .nav-btn.active {
+            color: #6a11cb;
+            border-bottom-color: #6a11cb;
+            background: rgba(106, 17, 203, 0.08);
+        }
+
+        .nav-btn i {
+            font-size: 1.2rem;
+        }
+
+        .nav-btn span {
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        /* Dark theme for nav buttons */
+        [data-theme="dark"] .nav-btn {
+            color: #e0e0e0;
+        }
+
+        [data-theme="dark"] .nav-btn:hover {
+            color: #a78bfa;
+            background: rgba(167, 139, 250, 0.1);
+        }
+
+        [data-theme="dark"] .nav-btn.active {
+            color: #a78bfa;
+            border-bottom-color: #a78bfa;
+            background: rgba(167, 139, 250, 0.15);
+        }
+
+        /* Responsive adjustments for mobile */
+        @media (max-width: 768px) {
+            .nav-buttons {
+                padding: 0 10px;
+                gap: 0;
+            }
+            
+            .nav-btn {
+                padding: 10px 8px;
+                font-size: 0.85rem;
+            }
+            
+            .nav-btn i {
+                font-size: 1rem;
+            }
+            
+            .nav-btn span {
+                font-size: 0.8rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .nav-btn span {
+                display: none; /* Hide text on very small screens, show only icons */
+            }
+            
+            .nav-btn {
+                padding: 12px 8px;
+            }
+        }
+
+        /* Responsive Design */
         @media (max-width: 768px) {
             body.authenticated {
                 margin-left: 0; /* Remove sidebar space on mobile */
@@ -566,7 +683,7 @@
             }
 
             .main-content {
-                padding: 80px 20px 20px 20px;
+                padding: 100px 20px 20px 20px; /* Consistent top padding, smaller side padding on mobile */
             }
 
             .auth-container {
@@ -683,6 +800,30 @@
             {% endif %}
         </div>
     </div>
+
+    <!-- Top Navigation Buttons - Only for authenticated users, but not on home or dashboard -->
+    {% if user.is_authenticated and request.resolver_match.url_name != 'home' and request.resolver_match.url_name != 'dashboard' %}
+    <div class="top-navigation">
+        <div class="nav-buttons">
+            <a href="{% url 'dashboard' %}" class="nav-btn {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+                <i class="fas fa-home"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="{% url 'movie_recommendation_page' %}" class="nav-btn {% if request.resolver_match.namespace == 'movies' or 'movie' in request.resolver_match.url_name %}active{% endif %}">
+                <i class="fas fa-film"></i>
+                <span>Movies</span>
+            </a>
+            <a href="{% url 'books:book_recommendation_page' %}" class="nav-btn {% if request.resolver_match.namespace == 'books' or 'book' in request.resolver_match.url_name %}active{% endif %}">
+                <i class="fas fa-book"></i>
+                <span>Books</span>
+            </a>
+            <a href="{% url 'course_genre_recommendation_page' %}" class="nav-btn {% if request.resolver_match.namespace == 'courses' or 'course' in request.resolver_match.url_name %}active{% endif %}">
+                <i class="fas fa-graduation-cap"></i>
+                <span>Courses</span>
+            </a>
+        </div>
+    </div>
+    {% endif %}
 
     <!-- Main Content -->
     <main class="main-content">

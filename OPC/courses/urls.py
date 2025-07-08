@@ -2,8 +2,8 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    # Course recommendation pages
-    path('courses/', views.course_recommendation_page, name='course_recommendation_page'),
+    # Course recommendation pages - now using genre-based as default
+    path('courses/', views.genre_recommendation_page, name='course_recommendation_page'),
     path('genre-courses/', views.genre_recommendation_page, name='course_genre_recommendation_page'),
     path('history/', views.recommendation_history_page, name='course_recommendation_history_page'),
     # API endpoints

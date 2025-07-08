@@ -1175,6 +1175,8 @@
                     <div class="recommendation-info" id="recommendation-info"></div>
                 </div>
                 <div class="results-actions">
+                    <button id="select-all-btn" class="btn btn-outline-primary"><i class="fas fa-check-double"></i> Select All</button>
+                    <button id="save-selected-btn" class="btn btn-success" style="display: none;"><i class="fas fa-save"></i> Save (<span id="selected-count">0</span>)</button>
                     <button type="button" class="btn-regenerate" id="regenerate-btn">
                         <i class="fas fa-redo-alt"></i> New Recommendations
                     </button>
@@ -1417,12 +1419,12 @@ document.addEventListener('DOMContentLoaded', function() {
                     <h4>No Movies Found</h4>
                     <p>Try selecting different genres or fewer genre combinations.</p>
                 </div>
-            `;
-        } else {
+            `;        } else {
             movies.forEach((movie, index) => {
                 const movieCard = document.createElement('div');
                 movieCard.className = 'movie-card';
                 movieCard.innerHTML = `
+                    <input type="checkbox" class="movie-checkbox" id="movie-${index}">
                     <h5 class="movie-title">${movie}</h5>
                     <div class="input-source">
                         <i class="fas fa-tags"></i>
@@ -1438,6 +1440,9 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Show regenerate button
         regenerateRecommendationsBtn.style.display = 'inline-flex';
+        
+        // Setup save functionality
+        setupSaveFunctionality();
     }
 
     function getRecommendations() {
@@ -1476,7 +1481,161 @@ document.addEventListener('DOMContentLoaded', function() {
     // Event listeners
     getRecommendationsBtn.addEventListener('click', getRecommendations);
     regenerateBtn.addEventListener('click', getRecommendations);
-    regenerateRecommendationsBtn.addEventListener('click', getRecommendations);    // Add click handlers for genre items
+    regenerateRecommendationsBtn.addEventListener('click', getRecommendations);
+    
+    // Save functionality functions
+    function setupSaveFunctionality() {
+        // Setup movie card selection
+        document.querySelectorAll('.movie-checkbox').forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                const movieCard = this.closest('.movie-card');
+                if (this.checked) {
+                    movieCard.classList.add('selected');
+                } else {
+                    movieCard.classList.remove('selected');
+                }
+                updateSelectedCount();
+            });
+        });
+        
+        // Setup Select All button
+        const selectAllBtn = document.getElementById('select-all-btn');
+        if (selectAllBtn) {
+            selectAllBtn.addEventListener('click', function() {
+                const allCheckboxes = document.querySelectorAll('.movie-checkbox');
+                const checkedCheckboxes = document.querySelectorAll('.movie-checkbox:checked');
+                const allCards = document.querySelectorAll('.movie-card');
+                
+                const allSelected = (allCheckboxes.length === checkedCheckboxes.length);
+                
+                if (allSelected) {
+                    // Unselect all
+                    allCheckboxes.forEach(cb => cb.checked = false);
+                    allCards.forEach(card => card.classList.remove('selected'));
+                    this.innerHTML = '<i class="fas fa-check-double"></i> Select All';
+                } else {
+                    // Select all
+                    allCheckboxes.forEach(cb => cb.checked = true);
+                    allCards.forEach(card => card.classList.add('selected'));
+                    this.innerHTML = '<i class="fas fa-check-double"></i> Unselect All';
+                }
+                
+                updateSelectedCount();
+            });
+        }
+        
+        // Setup Save button
+        const saveBtn = document.getElementById('save-selected-btn');
+        if (saveBtn) {
+            saveBtn.addEventListener('click', function() {
+                const selectedMovies = [];
+                const selectedTitles = [];
+                
+                document.querySelectorAll('.movie-checkbox:checked').forEach(checkbox => {
+                    const card = checkbox.closest('.movie-card');
+                    const title = card.querySelector('.movie-title').textContent.trim();
+                    selectedMovies.push({ title: title });
+                    selectedTitles.push(title);
+                });
+                
+                if (selectedMovies.length === 0) {
+                    showMessage('Please select at least one movie to save to your history.', 'warning');
+                    return;
+                }
+                
+                const confirmMessage = `Save ${selectedMovies.length} selected movie${selectedMovies.length > 1 ? 's' : ''} to your recommendation history?`;
+                
+                if (!confirm(confirmMessage)) {
+                    return;
+                }
+                
+                // Change button to show it's working
+                const originalText = this.innerHTML;
+                this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+                this.disabled = true;
+                
+                // Prepare save data
+                const saveData = {
+                    input_genres: getSelectedGenres(),
+                    selected_recommendations: {},
+                    model_used: 'GRHR'
+                };
+                
+                // Use genres as the key
+                const genreKey = getSelectedGenres().join(', ');
+                saveData.selected_recommendations[genreKey] = selectedTitles;
+                
+                // Send save request
+                fetch('/api/movies/save-selected/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                    },
+                    body: JSON.stringify(saveData)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    const successMessage = `🎉 Successfully saved ${selectedMovies.length} movie${selectedMovies.length > 1 ? 's' : ''} to your history!`;
+                    showMessage(successMessage, 'success');
+                    
+                    // Clear selections
+                    document.querySelectorAll('.movie-checkbox:checked').forEach(checkbox => {
+                        checkbox.checked = false;
+                        checkbox.closest('.movie-card').classList.remove('selected');
+                    });
+                    
+                    document.getElementById('select-all-btn').innerHTML = '<i class="fas fa-check-double"></i> Select All';
+                    updateSelectedCount();
+                })
+                .catch(error => {
+                    console.error('Save error:', error);
+                    showMessage('❌ Failed to save recommendations. Please try again.', 'error');
+                })
+                .finally(() => {
+                    this.innerHTML = originalText;
+                    this.disabled = false;
+                });
+            });
+        }
+        
+        updateSelectedCount();
+    }
+    
+    function updateSelectedCount() {
+        const selectedCheckboxes = document.querySelectorAll('.movie-checkbox:checked');
+        const totalCheckboxes = document.querySelectorAll('.movie-checkbox');
+        const selectedCount = selectedCheckboxes.length;
+        const totalCount = totalCheckboxes.length;
+        
+        const selectedCountElement = document.getElementById('selected-count');
+        if (selectedCountElement) {
+            selectedCountElement.textContent = selectedCount;
+        }
+        
+        const saveButton = document.getElementById('save-selected-btn');
+        if (saveButton) {
+            if (selectedCount > 0) {
+                saveButton.style.display = 'inline-flex';
+            } else {
+                saveButton.style.display = 'none';
+            }
+        }
+        
+        const selectAllButton = document.getElementById('select-all-btn');
+        if (selectAllButton && totalCount > 0) {
+            if (selectedCount === totalCount) {
+                selectAllButton.innerHTML = '<i class="fas fa-check-double"></i> Unselect All';
+            } else {
+                selectAllButton.innerHTML = '<i class="fas fa-check-double"></i> Select All';
+            }
+        }
+    }
+    
+    function showMessage(message, type) {
+        // Simple alert for now - can be enhanced with better styling
+        alert(message);
+    }    // Add click handlers for genre items
     document.querySelectorAll('.genre-item').forEach(item => {
         item.addEventListener('click', function(e) {
             // Prevent double-triggering if clicked directly on checkbox or label

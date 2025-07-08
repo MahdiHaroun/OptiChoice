@@ -10,6 +10,7 @@ from django.utils.decorators import method_decorator
 from django.db import models
 
 
+
 from .serializers import CourseRecommendationRequestSerializer, CourseRecommendationUserRatingSerializer , RecommendationHistorySerializer, CourseSerializer, CourseRecommendationUserGenreSerializer
 from .models import RecommendationHistory, Course
 # from .ai_models.knn import recommend_courses_knn
@@ -305,11 +306,6 @@ class CourseGenreBasedRecommendationView(APIView):
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-
-@login_required
-def course_recommendation_page(request):
-    """Render the course recommendation page"""
-    return render(request, 'courses/courses.html')
 
 @login_required
 def genre_recommendation_page(request):

@@ -106,8 +106,6 @@ class BookRecommendationView(APIView):
         
 
 class SaveSelectedRecommendations(APIView):
-    permission_classes = [IsAuthenticated]
-    
     def post(self, request):
         input_title = request.data.get('input_title')
         selected_recommendations = request.data.get('selected_recommendations', {})

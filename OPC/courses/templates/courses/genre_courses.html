@@ -555,6 +555,26 @@
     padding: 1.5rem;
     transition: all 0.3s ease;
     position: relative;
+    cursor: pointer;
+    user-select: none; /* Prevent text selection when clicking */
+}
+
+.course-card * {
+    pointer-events: none; /* Make all child elements non-clickable so only the card responds */
+    user-select: none; /* Prevent text selection */
+}
+
+.course-card .course-checkbox {
+    pointer-events: auto; /* But allow the checkbox to still be clickable */
+}
+
+/* Ensure all text elements are non-selectable and non-clickable */
+.course-card .course-title,
+.course-card .course-provider,
+.course-card .input-source,
+.course-card .course-cover {
+    pointer-events: none !important;
+    user-select: none !important;
 }
 
 .course-card:hover {
@@ -562,6 +582,17 @@
     background: #f1f5f9;
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+}
+
+.course-card:active {
+    transform: translateY(-1px);
+    background: #e2e8f0;
+}
+
+/* Add active state for better feedback */
+.course-card:active {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
 }
 
 [data-theme="dark"] .course-card {
@@ -572,7 +603,89 @@
 
 [data-theme="dark"] .course-card:hover {
     border-color: #667eea;
-    background: #3a4356;
+    background: #374151;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.25);
+}
+
+[data-theme="dark"] .course-card:active {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Enhanced Checkbox Styling */
+.course-checkbox {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    width: 1.8rem;
+    height: 1.8rem;
+    cursor: pointer;
+    z-index: 10;
+    accent-color: var(--primary);
+    transform: scale(1);
+    transition: all 0.2s ease;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 4px;
+    border: 2px solid var(--border);
+}
+
+.course-checkbox:hover {
+    transform: scale(1.1);
+    background: rgba(255, 255, 255, 1);
+    border-color: var(--primary);
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+
+.course-checkbox:checked {
+    animation: checkboxPulse 0.3s ease;
+    background: var(--primary);
+    border-color: var(--primary);
+}
+
+/* Dark theme checkbox */
+[data-theme="dark"] .course-checkbox {
+    background: rgba(45, 55, 72, 0.9);
+    border-color: #4a5568;
+}
+
+[data-theme="dark"] .course-checkbox:hover {
+    background: rgba(45, 55, 72, 1);
+    border-color: var(--primary);
+}
+
+[data-theme="dark"] .course-checkbox:checked {
+    background: var(--primary);
+    border-color: var(--primary);
+}
+
+@keyframes checkboxPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}
+
+/* Checkbox click area enhancement */
+.course-checkbox::before {
+    content: '';
+    position: absolute;
+    top: -10px;
+    left: -10px;
+    right: -10px;
+    bottom: -10px;
+    cursor: pointer;
+}
+
+.course-card.selected {
+    border-color: var(--primary);
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.08) 0%, rgba(165, 180, 252, 0.12) 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(99, 102, 241, 0.3);
+}
+
+[data-theme="dark"] .course-card.selected {
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(165, 180, 252, 0.20) 100%);
+    border-color: var(--primary);
 }
 
 .course-cover {
@@ -733,14 +846,7 @@
 </div>
 
 <!-- Navigation Section -->
-<div class="navigation-section">
-    <div class="nav-container">
-        <a href="{% url 'course_recommendation_page' %}" class="nav-button">
-            <i class="fas fa-graduation-cap"></i>
-            Try Course-Based Recommendations
-        </a>
-    </div>
-</div>
+
 
 <!-- Main Container -->
 <div class="courses-container">
@@ -928,8 +1034,16 @@
     <div class="results-section" id="results-section" style="display: none;">
         <div class="card">
             <div class="card-header">
-                <h3><i class="fas fa-list"></i> Your Course Recommendations</h3>
-                <div id="recommendation-info" class="recommendation-info"></div>
+                <div class="results-header" style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem;">
+                    <div class="results-title">
+                        <h3><i class="fas fa-list"></i> Your Course Recommendations</h3>
+                        <div id="recommendation-info" class="recommendation-info"></div>
+                    </div>
+                    <div class="results-actions" style="display: flex; gap: 1rem; align-items: center;">
+                        <button id="select-all-btn" class="btn btn-outline-primary"><i class="fas fa-check-double"></i> Select All</button>
+                        <button id="save-selected-btn" class="btn btn-success" style="display: none;"><i class="fas fa-save"></i> Save (<span id="selected-count">0</span>)</button>
+                    </div>
+                </div>
             </div>
             <div class="card-body">
                 <div id="recommendations-grid" class="recommendations-grid">
@@ -1024,6 +1138,7 @@ $(document).ready(function() {
             courses.forEach((course, index) => {
                 const courseCard = $(`
                     <div class="course-card" data-course-index="${index}">
+                        <input type="checkbox" class="course-checkbox" id="course-${index}">
                         <div class="course-cover">
                             🎓
                         </div>
@@ -1043,6 +1158,9 @@ $(document).ready(function() {
 
         $('#results-section').show();
         $('#error-section').hide();
+        
+        // Setup save functionality
+        setupSaveFunctionality();
     }
 
     // Get recommendations button
@@ -1094,6 +1212,189 @@ $(document).ready(function() {
             }
         });
     });
+    
+    // Save functionality functions
+    function setupSaveFunctionality() {
+        // Clear any existing handlers first
+        $('.course-checkbox').off('change');
+        $('#recommendations-grid').off('click', '.course-card');
+        
+        // Setup course card selection
+        $('.course-checkbox').on('change', function() {
+            const courseCard = $(this).closest('.course-card');
+            if ($(this).is(':checked')) {
+                courseCard.addClass('selected');
+            } else {
+                courseCard.removeClass('selected');
+            }
+            updateSelectedCount();
+        });
+        
+        // Make entire course card clickable using event delegation on the container
+        $('#recommendations-grid').on('click', '.course-card', function(e) {
+            console.log('Card clicked:', e.target); // Debug log
+            
+            // Don't interfere if clicking directly on the checkbox
+            if ($(e.target).is('input[type="checkbox"]') || $(e.target).hasClass('course-checkbox')) {
+                console.log('Clicked on checkbox, ignoring card click');
+                return;
+            }
+            
+            // Prevent any default actions
+            e.preventDefault();
+            e.stopPropagation();
+            
+            const checkbox = $(this).find('.course-checkbox');
+            if (checkbox.length === 0) {
+                console.log('No checkbox found in card');
+                return;
+            }
+            
+            // Toggle the checkbox
+            const isCurrentlyChecked = checkbox.prop('checked');
+            checkbox.prop('checked', !isCurrentlyChecked);
+            
+            console.log('Toggled checkbox from', isCurrentlyChecked, 'to', !isCurrentlyChecked);
+            
+            // Update visual state manually
+            if (!isCurrentlyChecked) {
+                $(this).addClass('selected');
+            } else {
+                $(this).removeClass('selected');
+            }
+            
+            // Update the counter
+            updateSelectedCount();
+        });
+        
+        // Alternative: Also listen for clicks on any element inside the card
+        $('#recommendations-grid').on('click', '.course-card *:not(.course-checkbox)', function(e) {
+            console.log('Child element clicked:', e.target);
+            e.preventDefault();
+            e.stopPropagation();
+            
+            // Trigger click on the parent card
+            $(this).closest('.course-card').trigger('click');
+        });
+        
+        // Setup Select All button
+        $('#select-all-btn').off('click').on('click', function() {
+            const allCheckboxes = $('.course-checkbox');
+            const checkedCheckboxes = $('.course-checkbox:checked');
+            const allCards = $('.course-card');
+            
+            const allSelected = (allCheckboxes.length === checkedCheckboxes.length);
+            
+            if (allSelected) {
+                // Unselect all
+                allCheckboxes.prop('checked', false);
+                allCards.removeClass('selected');
+                $(this).html('<i class="fas fa-check-double"></i> Select All');
+            } else {
+                // Select all
+                allCheckboxes.prop('checked', true);
+                allCards.addClass('selected');
+                $(this).html('<i class="fas fa-check-double"></i> Unselect All');
+            }
+            
+            updateSelectedCount();
+        });
+        
+        // Setup Save button
+        $('#save-selected-btn').off('click').on('click', function() {
+            const selectedCourses = [];
+            const selectedTitles = [];
+            
+            $('.course-checkbox:checked').each(function() {
+                const card = $(this).closest('.course-card');
+                const title = card.find('.course-title').text().trim();
+                selectedCourses.push({ title: title });
+                selectedTitles.push(title);
+            });
+            
+            if (selectedCourses.length === 0) {
+                alert('Please select at least one course to save to your history.');
+                return;
+            }
+            
+            const confirmMessage = `Save ${selectedCourses.length} selected course${selectedCourses.length > 1 ? 's' : ''} to your recommendation history?`;
+            
+            if (!confirm(confirmMessage)) {
+                return;
+            }
+            
+            // Change button to show it's working
+            const originalText = $(this).html();
+            $(this).html('<i class="fas fa-spinner fa-spin"></i> Saving...').prop('disabled', true);
+            
+            // Prepare save data
+            const saveData = {
+                input_genres: getSelectedGenres(),
+                selected_recommendations: {},
+                model_used: 'Genre-Based'
+            };
+            
+            // Use genres as the key
+            const genreKey = getSelectedGenres().join(', ');
+            saveData.selected_recommendations[genreKey] = selectedTitles;
+            
+            // Send save request
+            $.ajax({
+                url: '/courses/api/courses/save-selected/',
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrftoken,
+                    'Content-Type': 'application/json',
+                },
+                data: JSON.stringify(saveData),
+                success: function(response) {
+                    const successMessage = `🎉 Successfully saved ${selectedCourses.length} course${selectedCourses.length > 1 ? 's' : ''} to your history!`;
+                    alert(successMessage);
+                    
+                    // Clear selections
+                    $('.course-checkbox:checked').each(function() {
+                        $(this).prop('checked', false);
+                        $(this).closest('.course-card').removeClass('selected');
+                    });
+                    
+                    $('#select-all-btn').html('<i class="fas fa-check-double"></i> Select All');
+                    updateSelectedCount();
+                },
+                error: function(xhr, status, error) {
+                    console.error('Save error:', error);
+                    alert('❌ Failed to save recommendations. Please try again.');
+                },
+                complete: function() {
+                    $('#save-selected-btn').html(originalText).prop('disabled', false);
+                }
+            });
+        });
+        
+        updateSelectedCount();
+    }
+    
+    function updateSelectedCount() {
+        const selectedCheckboxes = $('.course-checkbox:checked');
+        const totalCheckboxes = $('.course-checkbox');
+        const selectedCount = selectedCheckboxes.length;
+        const totalCount = totalCheckboxes.length;
+        
+        $('#selected-count').text(selectedCount);
+        
+        if (selectedCount > 0) {
+            $('#save-selected-btn').show();
+        } else {
+            $('#save-selected-btn').hide();
+        }
+        
+        if (totalCount > 0) {
+            if (selectedCount === totalCount) {
+                $('#select-all-btn').html('<i class="fas fa-check-double"></i> Unselect All');
+            } else {
+                $('#select-all-btn').html('<i class="fas fa-check-double"></i> Select All');
+            }
+        }
+    }
 });
 </script>
 {% endblock %}
