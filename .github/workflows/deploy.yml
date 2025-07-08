@@ -44,6 +44,23 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      # Free up disk space on GitHub runner
+      - name: Free up disk space
+        run: |
+          echo "Disk space before cleanup:"
+          df -h
+
+          # Remove unnecessary packages and files
+          sudo apt-get clean
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /usr/local/lib/android
+          sudo rm -rf /opt/ghc
+          sudo rm -rf /opt/hostedtoolcache/CodeQL
+          sudo docker system prune -af
+
+          echo "Disk space after cleanup:"
+          df -h
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
 
@@ -57,10 +74,20 @@ jobs:
           echo "Building Django image..."
           docker build -t opc/django:latest -f OPC/Dockerfile OPC/
 
-      - name: Save Docker image to file
+          # Clean up intermediate layers to save space
+          docker system prune -f
+
+      - name: Save Docker image to file (compressed)
         run: |
-          docker save opc/django:latest > ./artifacts/django.tar
+          echo "Saving and compressing Docker image..."
+          docker save opc/django:latest | gzip > ./artifacts/django.tar.gz
           ls -la ./artifacts/
+
+          # Remove the Docker image from local cache to free up space
+          docker rmi opc/django:latest || true
+
+          # Show disk usage
+          df -h
 
       # Upload the built image to droplet
       - name: Upload Docker image
@@ -69,7 +96,7 @@ jobs:
           host: ${{ secrets.DROPLET_HOST }}
           username: ${{ secrets.DROPLET_USERNAME }}
           password: ${{ secrets.DROPLET_PASSWORD }}
-          source: "./artifacts/*.tar"
+          source: "./artifacts/*.tar.gz"
           target: "/opt/opc"
           strip_components: 1
 
@@ -130,9 +157,9 @@ jobs:
             # Navigate to app directory
             cd /opt/opc
 
-            # Load Docker image
+            # Load Docker image (decompress first)
             echo "Loading Docker image..."
-            docker load < django.tar
+            gunzip -c django.tar.gz | docker load
 
             if [ "${{ github.event.inputs.full_deploy }}" == "true" ]; then
               # Full deployment - restart everything
@@ -147,7 +174,7 @@ jobs:
             fi
 
             # Clean up tar files on server
-            rm -f django.tar
+            rm -f django.tar.gz
 
             echo "Deployment complete!"
 
