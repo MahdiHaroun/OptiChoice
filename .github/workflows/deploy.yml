@@ -91,34 +91,40 @@ jobs:
 
       # Upload the built image to droplet
       - name: Upload Docker image
-        uses: appleboy/scp-action@master
+        uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.DROPLET_HOST }}
           username: ${{ secrets.DROPLET_USERNAME }}
           password: ${{ secrets.DROPLET_PASSWORD }}
-          source: "./artifacts/*.tar.gz"
-          target: "/opt/opc"
-          strip_components: 1
+          port: 22
+          source: "./artifacts/django.tar.gz"
+          target: "/opt/opc/"
+          timeout: 300s
+          command_timeout: 300s
 
       # Upload configuration files
       - name: Upload configuration files
-        uses: appleboy/scp-action@master
+        uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.DROPLET_HOST }}
           username: ${{ secrets.DROPLET_USERNAME }}
           password: ${{ secrets.DROPLET_PASSWORD }}
+          port: 22
           source: "OPC/docker-compose.prod.yml,nginx.conf,.env.production"
-          target: "/opt/opc"
+          target: "/opt/opc/"
+          timeout: 60s
           overwrite: true
-          strip_components: 1
 
       # Deploy image
       - name: Deploy
-        uses: appleboy/ssh-action@master
+        uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.DROPLET_HOST }}
           username: ${{ secrets.DROPLET_USERNAME }}
           password: ${{ secrets.DROPLET_PASSWORD }}
+          port: 22
+          timeout: 300s
+          command_timeout: 300s
           script: |
             # Check Docker installation
             if ! command -v docker &> /dev/null; then
@@ -159,22 +165,22 @@ jobs:
 
             # Load Docker image (decompress first)
             echo "Loading Docker image..."
-            gunzip -c django.tar.gz | docker load
+            gunzip -c /opt/opc/django.tar.gz | docker load
 
             if [ "${{ github.event.inputs.full_deploy }}" == "true" ]; then
               # Full deployment - restart everything
               echo "Performing full deployment..."
-              docker-compose -f docker-compose.prod.yml down
-              docker-compose -f docker-compose.prod.yml up -d
+              docker-compose -f /opt/opc/OPC/docker-compose.prod.yml down
+              docker-compose -f /opt/opc/OPC/docker-compose.prod.yml up -d
             else
               # Targeted deployment - only restart Django container
               echo "Performing targeted deployment..."
-              docker-compose -f docker-compose.prod.yml up -d --no-deps web
-              docker-compose -f docker-compose.prod.yml up -d --no-deps nginx
+              docker-compose -f /opt/opc/OPC/docker-compose.prod.yml up -d --no-deps web
+              docker-compose -f /opt/opc/OPC/docker-compose.prod.yml up -d --no-deps nginx
             fi
 
             # Clean up tar files on server
-            rm -f django.tar.gz
+            rm -f /opt/opc/django.tar.gz
 
             echo "Deployment complete!"
 
