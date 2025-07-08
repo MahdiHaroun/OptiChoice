@@ -77,24 +77,16 @@ jobs:
           docker rmi opc/django:latest || true
           df -h
 
-      - name: Upload Docker image and configuration files
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.DROPLET_HOST }}
-          username: ${{ secrets.DROPLET_USERNAME }}
-          password: ${{ secrets.DROPLET_PASSWORD }}
-          port: 22
-          timeout: 300s
-          command_timeout: 300s
-          script: |
-            # Create directory if it doesn't exist
-            mkdir -p /opt/opc
-
-      - name: Upload files using rsync over SSH
+      - name: Upload files and deploy using SSH
         run: |
           # Install sshpass for password authentication
           sudo apt-get update
           sudo apt-get install -y sshpass rsync
+
+          # Create directory on server
+          echo "Creating directory on server..."
+          sshpass -p '${{ secrets.DROPLET_PASSWORD }}' ssh -o StrictHostKeyChecking=no -p 22 \
+            ${{ secrets.DROPLET_USERNAME }}@${{ secrets.DROPLET_HOST }} "mkdir -p /opt/opc"
 
           # Upload Docker image
           echo "Uploading Docker image..."
@@ -114,55 +106,53 @@ jobs:
 
           echo "File upload completed!"
 
-      - name: Deploy
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.DROPLET_HOST }}
-          username: ${{ secrets.DROPLET_USERNAME }}
-          password: ${{ secrets.DROPLET_PASSWORD }}
-          port: 22
-          timeout: 300s
-          command_timeout: 300s
-          script: |
-            if ! command -v docker &> /dev/null; then
-              echo "Docker not found, installing..."
-              apt-get update
-              apt-get install -y \
-                apt-transport-https \
-                ca-certificates \
-                curl \
-                gnupg \
-                lsb-release
-              curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
-              echo "deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
-              apt-get update
-              apt-get install -y docker-ce docker-ce-cli containerd.io
-              echo "Docker installed successfully"
-            fi
+      - name: Deploy application
+        run: |
+          # Deploy using SSH
+          sshpass -p '${{ secrets.DROPLET_PASSWORD }}' ssh -o StrictHostKeyChecking=no -p 22 \
+            ${{ secrets.DROPLET_USERNAME }}@${{ secrets.DROPLET_HOST }} << 'EOF'
 
-            if ! command -v docker-compose &> /dev/null; then
-              echo "Docker Compose not found, installing..."
-              curl -L "https://github.com/docker/compose/releases/download/v2.20.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-              chmod +x /usr/local/bin/docker-compose
-              echo "Docker Compose installed successfully"
-            fi
+          # Check Docker installation
+          if ! command -v docker &> /dev/null; then
+            echo "Docker not found, installing..."
+            apt-get update
+            apt-get install -y \
+              apt-transport-https \
+              ca-certificates \
+              curl \
+              gnupg \
+              lsb-release
+            curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+            echo "deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
+            apt-get update
+            apt-get install -y docker-ce docker-ce-cli containerd.io
+            echo "Docker installed successfully"
+          fi
 
-            cd /opt/opc
-            echo "Loading Docker image..."
-            gunzip -c /opt/opc/django.tar.gz | docker load
+          if ! command -v docker-compose &> /dev/null; then
+            echo "Docker Compose not found, installing..."
+            curl -L "https://github.com/docker/compose/releases/download/v2.20.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+            chmod +x /usr/local/bin/docker-compose
+            echo "Docker Compose installed successfully"
+          fi
 
-            if [ "${{ github.event.inputs.full_deploy }}" == "true" ]; then
-              echo "Performing full deployment..."
-              docker-compose -f /opt/opc/docker-compose.prod.yml down
-              docker-compose -f /opt/opc/docker-compose.prod.yml up -d
-            else
-              echo "Performing targeted deployment..."
-              docker-compose -f /opt/opc/docker-compose.prod.yml up -d --no-deps web
-              docker-compose -f /opt/opc/docker-compose.prod.yml up -d --no-deps nginx
-            fi
+          cd /opt/opc
+          echo "Loading Docker image..."
+          gunzip -c /opt/opc/django.tar.gz | docker load
 
-            rm -f /opt/opc/django.tar.gz
-            echo "Deployment complete!"
+          if [ "${{ github.event.inputs.full_deploy }}" == "true" ]; then
+            echo "Performing full deployment..."
+            docker-compose -f /opt/opc/docker-compose.prod.yml down
+            docker-compose -f /opt/opc/docker-compose.prod.yml up -d
+          else
+            echo "Performing targeted deployment..."
+            docker-compose -f /opt/opc/docker-compose.prod.yml up -d --no-deps web
+            docker-compose -f /opt/opc/docker-compose.prod.yml up -d --no-deps nginx
+          fi
+
+          rm -f /opt/opc/django.tar.gz
+          echo "Deployment complete!"
+          EOF
 
       - name: Clean up artifacts
         if: always()
