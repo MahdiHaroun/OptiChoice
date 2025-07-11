@@ -2,6 +2,10 @@
 
 ![OptiChoice Logo](logo.png)
 
+## Deployment Status
+- Latest update: Fixed AI model loading errors with comprehensive error handling
+- All joblib.load() calls now have try-catch blocks for graceful degradation
+
 ## Table of Contents
 
 1. [Project Overview](#project-overview)
