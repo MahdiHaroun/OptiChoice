@@ -5,6 +5,9 @@ import random
 from tensorflow.keras.models import load_model
 from django.conf import settings
 from sklearn.metrics.pairwise import cosine_similarity
+import logging
+
+logger = logging.getLogger(__name__)
 
 # Paths
 NN_PATH = os.path.join(settings.BASE_DIR, 'movies', 'joblibs', 'NN')
@@ -30,9 +33,14 @@ def recommend_movies_nn(movie_titles, top_k=10):
     if isinstance(movie_titles, str):
         movie_titles = [movie_titles]
     
-    # Load the pre-trained model and movie data
-    model = load_model(MODEL_PATH)
-    movies_data = joblib.load(MOVIES_DATA_PATH)
+    # Load the pre-trained model and movie data with error handling
+    try:
+        model = load_model(MODEL_PATH)
+        movies_data = joblib.load(MOVIES_DATA_PATH)
+        logger.info("NN model files loaded successfully")
+    except Exception as e:
+        logger.warning(f"Failed to load NN model files: {e}")
+        return {title: "Model data not available" for title in movie_titles}
     
     results = {}
     
@@ -41,10 +49,11 @@ def recommend_movies_nn(movie_titles, top_k=10):
                       if col not in ['title', 'genres', 'movieId', 'rating_count', 'avg_rating']]
     
     for title in movie_titles:
-        title = title.strip()
-        
-        # Find the input movie
-        movie_match = movies_data[movies_data['title'].str.lower() == title.lower()]
+        try:
+            title = title.strip()
+            
+            # Find the input movie
+            movie_match = movies_data[movies_data['title'].str.lower() == title.lower()]
         
         if movie_match.empty:
             results[title] = [f"Movie '{title}' not found in database."]
@@ -64,25 +73,29 @@ def recommend_movies_nn(movie_titles, top_k=10):
         noise = np.random.randn(len(similarities)) * 0.01  # Small random noise
         similarities = similarities + noise
         
-        # Exclude the input movie itself
-        input_index = movie_match.index[0]
-        similarities[input_index] = -1
+            # Exclude the input movie itself
+            input_index = movie_match.index[0]
+            similarities[input_index] = -1
+            
+            # Get more candidates than requested for randomization
+            search_k = min(top_k * 3, len(movies_data))  # Get 3x more results or all available
+            top_indices = np.argsort(similarities)[::-1][:search_k]
+            
+            # Extract movie titles from candidates
+            candidate_recommendations = movies_data.iloc[top_indices]['title'].tolist()
+            
+            # Randomly shuffle and select the requested number of recommendations
+            if len(candidate_recommendations) > top_k:
+                random.shuffle(candidate_recommendations)
+                recommendations = candidate_recommendations[:top_k]
+            else:
+                recommendations = candidate_recommendations
+            
+            results[title] = recommendations
         
-        # Get more candidates than requested for randomization
-        search_k = min(top_k * 3, len(movies_data))  # Get 3x more results or all available
-        top_indices = np.argsort(similarities)[::-1][:search_k]
-        
-        # Extract movie titles from candidates
-        candidate_recommendations = movies_data.iloc[top_indices]['title'].tolist()
-        
-        # Randomly shuffle and select the requested number of recommendations
-        if len(candidate_recommendations) > top_k:
-            random.shuffle(candidate_recommendations)
-            recommendations = candidate_recommendations[:top_k]
-        else:
-            recommendations = candidate_recommendations
-        
-        results[title] = recommendations
+        except Exception as e:
+            logger.error(f"Error processing movie '{title}': {e}")
+            results[title] = "Error processing recommendation"
     
     return results
 

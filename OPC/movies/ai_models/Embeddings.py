@@ -5,14 +5,29 @@ from sentence_transformers import SentenceTransformer, util
 import os
 import random
 from django.conf import settings
+import logging
+
+logger = logging.getLogger(__name__)
 
 EMB_PATH = os.path.join(settings.BASE_DIR, 'movies', 'joblibs', 'Embeddings')
 
-# Load model and data
-model = SentenceTransformer('all-MiniLM-L6-v2')
-movies = joblib.load(os.path.join(EMB_PATH, 'movies.pkl'))
-movie_embeddings = torch.load(os.path.join(EMB_PATH, 'movie_embeddings.pt'), map_location=torch.device('cpu'))
-movie_embeddings = torch.nn.functional.normalize(movie_embeddings, p=2, dim=1)
+# Initialize variables
+model = None
+movies = None
+movie_embeddings = None
+
+# Load model and data with error handling
+try:
+    model = SentenceTransformer('all-MiniLM-L6-v2')
+    movies = joblib.load(os.path.join(EMB_PATH, 'movies.pkl'))
+    movie_embeddings = torch.load(os.path.join(EMB_PATH, 'movie_embeddings.pt'), map_location=torch.device('cpu'))
+    movie_embeddings = torch.nn.functional.normalize(movie_embeddings, p=2, dim=1)
+    logger.info("Embeddings model files loaded successfully")
+except Exception as e:
+    logger.warning(f"Failed to load Embeddings model files: {e}")
+    model = None
+    movies = None
+    movie_embeddings = None
 
 def recommend_movies_embeddings(movie_titles, top_k=10):
     """
@@ -23,6 +38,13 @@ def recommend_movies_embeddings(movie_titles, top_k=10):
     Returns:
         Dictionary with input titles as keys and recommendation lists as values
     """
+    # Check if model data is available
+    if model is None or movies is None or movie_embeddings is None:
+        logger.warning("Embeddings model data not available, returning empty recommendations")
+        if isinstance(movie_titles, str):
+            return {movie_titles: "Model data not available"}
+        return {title: "Model data not available" for title in movie_titles}
+    
     # Reset random seed for different results each time
     import time
     random.seed(int(time.time()))
@@ -33,14 +55,13 @@ def recommend_movies_embeddings(movie_titles, top_k=10):
     results = {}
     
     for title in movie_titles:
-        title = title.strip()
-        idx = movies[movies['title'].str.lower() == title.lower()].index
-        
-        if len(idx) == 0:
-            results[title] = [f"Movie '{title}' not found in database."]
-            continue
-        
         try:
+            title = title.strip()
+            idx = movies[movies['title'].str.lower() == title.lower()].index
+            
+            if len(idx) == 0:
+                results[title] = [f"Movie '{title}' not found in database."]
+                continue
             # Get the movie description for embedding
             movie_description = movies.loc[idx[0], 'description']
             if not movie_description or str(movie_description).lower() == 'nan':
@@ -79,6 +100,7 @@ def recommend_movies_embeddings(movie_titles, top_k=10):
             results[title] = recommendations
             
         except Exception as e:
+            logger.error(f"Error processing movie '{title}': {e}")
             results[title] = [f"Error processing '{title}': {str(e)}"]
     
     return results
