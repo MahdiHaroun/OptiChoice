@@ -22,7 +22,11 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # Create directories for static and media files
-RUN mkdir -p /app/static /app/media
+RUN mkdir -p /app/static /app/media /app/static/images
+
+# Copy additional static files
+COPY side_image.png /app/static/
+COPY logo.png /app/static/images/
 
 # Collect static files
 RUN python manage.py collectstatic --noinput || echo "Static files collection failed"
