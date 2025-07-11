@@ -55,24 +55,24 @@ def recommend_movies_nn(movie_titles, top_k=10):
             # Find the input movie
             movie_match = movies_data[movies_data['title'].str.lower() == title.lower()]
         
-        if movie_match.empty:
-            results[title] = [f"Movie '{title}' not found in database."]
-            continue
+            if movie_match.empty:
+                results[title] = [f"Movie '{title}' not found in database."]
+                continue
+                
+            # Get input movie features
+            input_features = movie_match[feature_columns].values[0].astype('float32')
             
-        # Get input movie features
-        input_features = movie_match[feature_columns].values[0].astype('float32')
+            # Get features for all movies in the dataset
+            all_features = movies_data[feature_columns].values.astype('float32')
+            
+            # Calculate cosine similarity between input movie and all movies
+            input_features = input_features.reshape(1, -1)
+            similarities = cosine_similarity(input_features, all_features)[0]
         
-        # Get features for all movies in the dataset
-        all_features = movies_data[feature_columns].values.astype('float32')
-        
-        # Calculate cosine similarity between input movie and all movies
-        input_features = input_features.reshape(1, -1)
-        similarities = cosine_similarity(input_features, all_features)[0]
-        
-        # Add small random noise to similarities for variety (without destroying ranking too much)
-        noise = np.random.randn(len(similarities)) * 0.01  # Small random noise
-        similarities = similarities + noise
-        
+            # Add small random noise to similarities for variety (without destroying ranking too much)
+            noise = np.random.randn(len(similarities)) * 0.01  # Small random noise
+            similarities = similarities + noise
+            
             # Exclude the input movie itself
             input_index = movie_match.index[0]
             similarities[input_index] = -1
