@@ -161,55 +161,107 @@ jobs:
           else
             echo "Docker Compose is already installed"
           fi
-          EOF
-
-          # Step 2: Load Docker image (with timeout handling)
+          EOF          # Step 2: Load Docker image (with better error handling)
           echo "Step 2: Loading Docker image..."
           sshpass -p "$DROPLET_PASSWORD" ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ServerAliveInterval=60 -o ServerAliveCountMax=20 -p 22 \
             $DROPLET_USERNAME@$DROPLET_HOST << 'EOF'
 
           cd /opt/opc
-          if [ -f django.tar.gz ]; then
-            echo "Loading Docker image from compressed file..."
-            timeout 600 gunzip -c django.tar.gz | docker load || {
-              echo "Docker load failed or timed out, trying alternative approach..."
-              gunzip django.tar.gz
-              docker load -i django.tar || echo "Alternative load also failed"
-            }
-            echo "Docker image loaded successfully"
-          else
+
+          # Check if compressed file exists
+          if [ ! -f django.tar.gz ]; then
             echo "Error: django.tar.gz file not found!"
             exit 1
           fi
-          EOF
 
-          # Step 3: Deploy the application
+          # Clean up Docker system and fix potential issues
+          echo "Cleaning up Docker system..."
+          docker system prune -f
+          sudo systemctl restart docker
+          sleep 5
+
+          # Check Docker status
+          if ! docker info > /dev/null 2>&1; then
+            echo "Docker is not running properly, restarting..."
+            sudo systemctl restart docker
+            sleep 10
+          fi
+
+          # Remove any existing image with same name
+          docker rmi opc/django:latest 2>/dev/null || true
+
+          # Load the image with better error handling
+          echo "Loading Docker image from compressed file..."
+          if gunzip -c django.tar.gz | docker load; then
+            echo "Docker image loaded successfully via gunzip method"
+          else
+            echo "Gunzip method failed, trying alternative..."
+            # Try uncompressing first then loading
+            if gunzip django.tar.gz; then
+              if docker load -i django.tar; then
+                echo "Docker image loaded successfully via tar method"
+              else
+                echo "Docker load failed completely"
+                exit 1
+              fi
+            else
+              echo "Failed to uncompress django.tar.gz"
+              exit 1
+            fi
+          fi
+
+          # Verify the image was loaded
+          if docker images | grep -q "opc/django"; then
+            echo "✓ Docker image opc/django is available"
+            docker images | grep opc/django
+          else
+            echo "✗ Failed to load Docker image"
+            exit 1
+          fi
+          EOF          # Step 3: Deploy the application
           echo "Step 3: Deploying application..."
           sshpass -p "$DROPLET_PASSWORD" ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ServerAliveInterval=60 -o ServerAliveCountMax=10 -p 22 \
             $DROPLET_USERNAME@$DROPLET_HOST << 'EOF'
 
           cd /opt/opc
 
+          # Verify image is available before deployment
+          if ! docker images | grep -q "opc/django"; then
+            echo "Error: opc/django image not found. Cannot proceed with deployment."
+            exit 1
+          fi
+
           # Stop existing containers
           echo "Stopping existing containers..."
           docker-compose -f docker-compose.prod.yml down || true
+
+          # Remove any orphaned containers
+          docker container prune -f
 
           if [ "${{ github.event.inputs.full_deploy }}" == "true" ]; then
             echo "Performing full deployment..."
             docker-compose -f docker-compose.prod.yml up -d
           else
             echo "Performing targeted deployment..."
+            # Use --no-deps to prevent pulling from registry
             docker-compose -f docker-compose.prod.yml up -d --no-deps web
             docker-compose -f docker-compose.prod.yml up -d --no-deps nginx
           fi
 
-          # Clean up
-          rm -f django.tar django.tar.gz
+          # Wait for containers to start
+          echo "Waiting for containers to start..."
+          sleep 10
 
           # Check deployment status
           echo "Checking deployment status..."
-          sleep 5
           docker-compose -f docker-compose.prod.yml ps
+
+          # Show container logs for debugging
+          echo "Recent web container logs:"
+          docker-compose -f docker-compose.prod.yml logs --tail=20 web || true
+
+          # Clean up compressed files
+          rm -f django.tar django.tar.gz
 
           echo "Deployment complete!"
           EOF
