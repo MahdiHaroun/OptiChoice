@@ -1,8 +1,9 @@
-# OptiChoice - Comprehensive System Documentation
+p# OptiChoice - Comprehensive System Documentation
 
 ![OptiChoice Logo](logo.png)
 
 ## Deployment Status
+
 - Latest update: Fixed AI model loading errors with comprehensive error handling
 - All joblib.load() calls now have try-catch blocks for graceful degradation
 
@@ -26,11 +27,13 @@
 ## Project Overview
 
 **OptiChoice** is a Django-based multi-domain recommendation system that provides AI-powered suggestions for:
+
 - **Movies** - Content-based and collaborative filtering
 - **Books** - Text similarity and neural network models
 - **Courses** - Genre-based and educational content matching
 
 ### Key Features
+
 - Multiple AI recommendation algorithms
 - JWT-based authentication with email verification
 - RESTful API architecture
@@ -44,6 +47,7 @@
 ## System Architecture
 
 ### Technology Stack
+
 - **Backend**: Django 5.2.1 + Django REST Framework
 - **Database**: SQLite (development) / PostgreSQL (production)
 - **Authentication**: JWT + Session-based
@@ -53,11 +57,12 @@
 - **Email**: SMTP (Gmail integration)
 
 ### Application Structure
+
 ```
 OPC/
 ├── authentication/          # User management & auth
 ├── movies/                 # Movie recommendations
-├── books/                  # Book recommendations  
+├── books/                  # Book recommendations
 ├── courses/                # Course recommendations
 ├── OPC/                    # Project settings
 ├── static/                 # Static assets
@@ -71,6 +76,7 @@ OPC/
 ### User Authentication Flow
 
 #### 1. Registration Process
+
 ```python
 # Two-phase registration for security
 1. User submits registration form
@@ -82,6 +88,7 @@ OPC/
 ```
 
 #### 2. Authentication Models
+
 ```python
 # UserProfile Model (authentication/models.py)
 class UserProfile(models.Model):
@@ -95,6 +102,7 @@ class UserProfile(models.Model):
 ```
 
 #### 3. Security Features
+
 - **Email Verification**: Required before login
 - **Token Expiry**: 1 hour for email verification, 24 hours for password reset
 - **Session Management**: Remember me functionality
@@ -102,6 +110,7 @@ class UserProfile(models.Model):
 - **Password Validation**: Django's built-in validators
 
 #### 4. Authentication Endpoints
+
 ```python
 # Authentication URLs (authentication/urls.py)
 - /                         # Home page
@@ -122,6 +131,7 @@ class UserProfile(models.Model):
 ### Movies Recommendation Models
 
 #### 1. TF-IDF Model (`movies/ai_models/tfidf.py`)
+
 ```python
 # Text-based similarity using TF-IDF vectorization
 - Algorithm: Term Frequency-Inverse Document Frequency
@@ -132,6 +142,7 @@ class UserProfile(models.Model):
 ```
 
 #### 2. K-Nearest Neighbors (`movies/ai_models/knn.py`)
+
 ```python
 # Collaborative filtering using KNN
 - Algorithm: K-Nearest Neighbors
@@ -142,19 +153,21 @@ class UserProfile(models.Model):
 ```
 
 #### 3. Genre-Based KNN (`movies/ai_models/knn_genre.py`)
+
 ```python
 # Genre-focused recommendations
 - Algorithm: KNN with genre features
 - Input: Movie titles
 - Features: One-hot encoded genres
-- Genres: ['Action', 'Adventure', 'Animation', 'Children', 'Comedy', 
-          'Crime', 'Documentary', 'Drama', 'Fantasy', 'Film-Noir', 
-          'Horror', 'IMAX', 'Musical', 'Mystery', 'Romance', 
+- Genres: ['Action', 'Adventure', 'Animation', 'Children', 'Comedy',
+          'Crime', 'Documentary', 'Drama', 'Fantasy', 'Film-Noir',
+          'Horror', 'IMAX', 'Musical', 'Mystery', 'Romance',
           'Sci-Fi', 'Thriller', 'War', 'Western']
 - Output: Genre-similar movies
 ```
 
 #### 4. Neural Network Model (`movies/ai_models/NN.py`)
+
 ```python
 # Deep learning approach
 - Algorithm: Neural Network (TensorFlow/Keras)
@@ -165,6 +178,7 @@ class UserProfile(models.Model):
 ```
 
 #### 5. Embeddings Model (`movies/ai_models/Embeddings.py`)
+
 ```python
 # Semantic similarity using sentence transformers
 - Algorithm: Sentence-BERT embeddings
@@ -176,6 +190,7 @@ class UserProfile(models.Model):
 ```
 
 #### 6. Genre-Based Traditional (`movies/ai_models/Genre_Based.py`)
+
 ```python
 # Traditional genre matching
 - Algorithm: Cosine similarity on genre vectors
@@ -185,6 +200,7 @@ class UserProfile(models.Model):
 ```
 
 #### 7. GRHR Model (`movies/ai_models/GRHR.py`)
+
 ```python
 # Genre-Rating Hybrid Recommendation
 - Algorithm: Hybrid approach combining genres and ratings
@@ -196,6 +212,7 @@ class UserProfile(models.Model):
 ### Books Recommendation Models
 
 #### 1. K-Nearest Neighbors (`books/ai_models/KNN.py`)
+
 ```python
 # Book similarity using KNN
 - Algorithm: KNN on TF-IDF features
@@ -206,6 +223,7 @@ class UserProfile(models.Model):
 ```
 
 #### 2. Neural Network (`books/ai_models/NN.py`)
+
 ```python
 # Deep learning for books
 - Algorithm: Neural Network (TensorFlow/Keras)
@@ -216,6 +234,7 @@ class UserProfile(models.Model):
 ```
 
 #### 3. Embeddings (`books/ai_models/Embeddings.py`)
+
 ```python
 # Semantic book recommendations
 - Algorithm: Sentence-BERT embeddings
@@ -226,6 +245,7 @@ class UserProfile(models.Model):
 ```
 
 #### 4. TF-IDF (`books/ai_models/tfidf.py`)
+
 ```python
 # Text-based book similarity
 - Algorithm: TF-IDF + Nearest Neighbors
@@ -235,6 +255,7 @@ class UserProfile(models.Model):
 ```
 
 #### 5. Genre-Based (`books/ai_models/Genre_Based.py`)
+
 ```python
 # Category-based book recommendations
 - Algorithm: Genre/category matching
@@ -246,10 +267,11 @@ class UserProfile(models.Model):
 ### Courses Recommendation Models
 
 #### 1. Genre-Based (`courses/ai_models/Genre_Based.py`)
+
 ```python
 # Educational content categorization
 - Algorithm: Keyword-based genre classification
-- Categories: 'Technology', 'Business', 'Health', 'Arts', 
+- Categories: 'Technology', 'Business', 'Health', 'Arts',
             'Science', 'Education', 'Language', 'Other'
 - Input: Course titles or genre preferences
 - Features: Course title analysis + genre matching
@@ -257,6 +279,7 @@ class UserProfile(models.Model):
 ```
 
 #### 2. KNN Model (`courses/ai_models/KNN.py`)
+
 ```python
 # Course similarity (placeholder implementation)
 - Algorithm: KNN (to be implemented)
@@ -267,6 +290,7 @@ class UserProfile(models.Model):
 ### Model Loading & Data Management
 
 #### Joblib Files Structure
+
 ```
 Each model stores pre-trained components in joblibs/:
 movies/joblibs/
@@ -290,6 +314,7 @@ books/joblibs/
 ## Database Models
 
 ### Authentication Models
+
 ```python
 # Django's built-in User model extended with:
 class UserProfile(models.Model):
@@ -303,6 +328,7 @@ class UserProfile(models.Model):
 ```
 
 ### Movies Models
+
 ```python
 class Movie(models.Model):
     movie_id = IntegerField(unique=True)
@@ -318,6 +344,7 @@ class RecommendationHistory(models.Model):
 ```
 
 ### Books Models
+
 ```python
 class Book(models.Model):
     book_id = IntegerField(unique=True)
@@ -335,6 +362,7 @@ class BookRecommendationHistory(models.Model):
 ```
 
 ### Courses Models
+
 ```python
 class Course(models.Model):
     course_id = CharField(unique=True)
@@ -353,6 +381,7 @@ class RecommendationHistory(models.Model):
 ## API Endpoints
 
 ### Authentication Endpoints
+
 ```python
 # Base authentication URLs
 GET  /                                     # Home page
@@ -366,6 +395,7 @@ POST /delete-account/                     # Account deletion
 ```
 
 ### Movies API
+
 ```python
 # Movie recommendation endpoints
 GET  /movies/                             # Movie recommendation page
@@ -383,6 +413,7 @@ POST /api/movies/history/delete-bulk/    # Bulk delete history
 ```
 
 ### Books API
+
 ```python
 # Book recommendation endpoints
 GET  /books/                              # Book recommendation page
@@ -400,6 +431,7 @@ POST /books/api/genre-recommendations/   # Genre-based recommendations
 ```
 
 ### Courses API
+
 ```python
 # Course recommendation endpoints
 GET  /courses/courses/                    # Course recommendation page
@@ -418,31 +450,33 @@ POST /courses/api/courses/history/delete-bulk/   # Bulk delete history
 ### API Request/Response Formats
 
 #### Movie Recommendation Request
+
 ```json
 {
-    "movie_title": "The Matrix",
-    "num_recommendations": 5,
-    "model_used": "Embeddings",
-    "save_history": true,
-    "regenerate": false
+  "movie_title": "The Matrix",
+  "num_recommendations": 5,
+  "model_used": "Embeddings",
+  "save_history": true,
+  "regenerate": false
 }
 ```
 
 #### Movie Recommendation Response
+
 ```json
 {
-    "recommendations": {
-        "The Matrix": [
-            "Blade Runner",
-            "Ghost in the Shell",
-            "Minority Report",
-            "Ex Machina",
-            "I, Robot"
-        ]
-    },
-    "saved_history": true,
-    "regenerated": false,
-    "input_movie": "The Matrix"
+  "recommendations": {
+    "The Matrix": [
+      "Blade Runner",
+      "Ghost in the Shell",
+      "Minority Report",
+      "Ex Machina",
+      "I, Robot"
+    ]
+  },
+  "saved_history": true,
+  "regenerated": false,
+  "input_movie": "The Matrix"
 }
 ```
 
@@ -451,6 +485,7 @@ POST /courses/api/courses/history/delete-bulk/   # Bulk delete history
 ## Services & External Dependencies
 
 ### Email Service
+
 ```python
 # SMTP Configuration (settings.py)
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
@@ -468,6 +503,7 @@ EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
 ```
 
 ### Machine Learning Dependencies
+
 ```python
 # Core ML Libraries
 - tensorflow==2.19.0              # Neural networks
@@ -487,6 +523,7 @@ EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
 ```
 
 ### Web Framework Dependencies
+
 ```python
 # Django Stack
 - Django==5.2.1                   # Core framework
@@ -504,6 +541,7 @@ EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
 ## Frontend Implementation
 
 ### Template Structure
+
 ```python
 # Django Templates Organization
 authentication/templates/
@@ -534,6 +572,7 @@ courses/templates/courses/
 ```
 
 ### JavaScript Features
+
 ```javascript
 // Core Frontend Functionality
 - AJAX-based search with autocomplete
@@ -551,24 +590,19 @@ courses/templates/courses/
 ```
 
 ### UI Components
+
 ```html
 <!-- Search Interface -->
-- Autocomplete search inputs
-- Model selection dropdowns
-- Number of recommendations slider
-- Advanced filtering options
+- Autocomplete search inputs - Model selection dropdowns - Number of
+recommendations slider - Advanced filtering options
 
 <!-- Results Display -->
-- Card-based recommendation layout
-- Pagination for large result sets
-- Save/bookmark functionality
-- Regenerate recommendations button
+- Card-based recommendation layout - Pagination for large result sets -
+Save/bookmark functionality - Regenerate recommendations button
 
 <!-- History Management -->
-- Sortable recommendation history
-- Filter by model type
-- Bulk actions (delete, export)
-- Statistics dashboard
+- Sortable recommendation history - Filter by model type - Bulk actions (delete,
+export) - Statistics dashboard
 ```
 
 ---
@@ -578,6 +612,7 @@ courses/templates/courses/
 ### Docker Configuration
 
 #### Dockerfile
+
 ```dockerfile
 FROM python:3.12-slim
 
@@ -600,8 +635,9 @@ CMD ["gunicorn", "--bind", "0.0.0.0:8000", "OPC.wsgi:application"]
 ```
 
 #### Docker Compose (Development)
+
 ```yaml
-version: '3.8'
+version: "3.8"
 services:
   web:
     build: .
@@ -618,6 +654,7 @@ services:
 ```
 
 #### Production Deployment Files
+
 ```bash
 # Available deployment configurations
 - docker-compose.prod.yml         # Production with PostgreSQL
@@ -630,6 +667,7 @@ services:
 ```
 
 ### Environment Configuration
+
 ```python
 # Environment Variables (.env)
 SECRET_KEY=                       # Django secret key
@@ -661,6 +699,7 @@ CORS_ALLOWED_ORIGINS=             # Frontend URLs
 ## Security Features
 
 ### Authentication Security
+
 ```python
 # Email Verification
 - Required before account activation
@@ -681,6 +720,7 @@ CORS_ALLOWED_ORIGINS=             # Frontend URLs
 ```
 
 ### API Security
+
 ```python
 # JWT Authentication
 - Access tokens (60 minutes default)
@@ -701,6 +741,7 @@ CORS_ALLOWED_ORIGINS=             # Frontend URLs
 ```
 
 ### Data Protection
+
 ```python
 # Database Security
 - Indexed sensitive fields
@@ -720,6 +761,7 @@ CORS_ALLOWED_ORIGINS=             # Frontend URLs
 ## Configuration Management
 
 ### Settings Architecture
+
 ```python
 # Environment-based configuration
 - Development settings (DEBUG=True)
@@ -741,6 +783,7 @@ CORS_ALLOWED_ORIGINS=             # Frontend URLs
 ```
 
 ### Feature Flags
+
 ```python
 # Model Availability
 - Graceful degradation when ML models unavailable
@@ -759,6 +802,7 @@ CORS_ALLOWED_ORIGINS=             # Frontend URLs
 ## Development & Testing
 
 ### Development Setup
+
 ```bash
 # Local Development
 1. Clone repository
@@ -771,6 +815,7 @@ CORS_ALLOWED_ORIGINS=             # Frontend URLs
 ```
 
 ### Code Structure & Best Practices
+
 ```python
 # Django Best Practices
 - Apps organized by domain (movies, books, courses)
@@ -788,6 +833,7 @@ CORS_ALLOWED_ORIGINS=             # Frontend URLs
 ```
 
 ### Testing Strategy
+
 ```python
 # Test Coverage Areas
 - Unit tests for models
@@ -802,6 +848,7 @@ python manage.py test
 ```
 
 ### Model Development Workflow
+
 ```python
 # Adding New AI Models
 1. Create model file in app/ai_models/
@@ -818,6 +865,7 @@ python manage.py test
 ## Performance Considerations
 
 ### Database Optimization
+
 ```python
 # Indexing Strategy
 - Database indexes on frequently queried fields
@@ -833,6 +881,7 @@ python manage.py test
 ```
 
 ### AI Model Performance
+
 ```python
 # Model Loading Strategy
 - Lazy loading of ML models
@@ -848,6 +897,7 @@ python manage.py test
 ```
 
 ### Scalability Features
+
 ```python
 # Horizontal Scaling Ready
 - Stateless application design
@@ -867,6 +917,7 @@ python manage.py test
 ## Monitoring & Maintenance
 
 ### Logging Strategy
+
 ```python
 # Application Logging
 - Authentication events
@@ -882,6 +933,7 @@ python manage.py test
 ```
 
 ### Health Checks
+
 ```bash
 # Available Health Monitoring
 - health-check.sh script
@@ -892,6 +944,7 @@ python manage.py test
 ```
 
 ### Backup & Recovery
+
 ```python
 # Data Backup Strategy
 - Database backups
@@ -911,6 +964,7 @@ python manage.py test
 ## Future Enhancements
 
 ### Planned Features
+
 ```python
 # Advanced AI Models
 - Collaborative filtering improvements
@@ -932,6 +986,7 @@ python manage.py test
 ```
 
 ### Integration Opportunities
+
 ```python
 # External APIs
 - Movie databases (TMDB, OMDB)
