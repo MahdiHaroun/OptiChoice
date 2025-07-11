@@ -1,15 +1,33 @@
 import os
 from django.conf import settings
 import joblib
+import logging
+
+logger = logging.getLogger(__name__)
 
 # Define the base directory for joblib files
 KNN_PATH = os.path.join(settings.BASE_DIR, 'movies', 'joblibs', 'KNN')
 
-# Load data
-model = joblib.load(os.path.join(KNN_PATH, 'knn_model.joblib'))
-movie_mapping= joblib.load(os.path.join(KNN_PATH, 'movie_mapping.joblib'))
-reverse_mapping = joblib.load(os.path.join(KNN_PATH, 'reverse_mapping.joblib'))
-sparse_matrix = joblib.load(os.path.join(KNN_PATH, 'sparse_matrix.joblib'))
+# Initialize variables
+model = None
+movie_mapping = None
+reverse_mapping = None
+sparse_matrix = None
+
+# Try to load data with error handling
+try:
+    model = joblib.load(os.path.join(KNN_PATH, 'knn_model.joblib'))
+    movie_mapping = joblib.load(os.path.join(KNN_PATH, 'movie_mapping.joblib'))
+    reverse_mapping = joblib.load(os.path.join(KNN_PATH, 'reverse_mapping.joblib'))
+    sparse_matrix = joblib.load(os.path.join(KNN_PATH, 'sparse_matrix.joblib'))
+    logger.info("KNN model files loaded successfully")
+except Exception as e:
+    logger.warning(f"Failed to load KNN model files: {e}")
+    # Set default values or None
+    model = None
+    movie_mapping = {}
+    reverse_mapping = {}
+    sparse_matrix = None
 
 
 
@@ -22,6 +40,12 @@ def recommend_movies_knn(movie_titles, n=5, top_k=20):
     - top_k: number of top similar movies to consider for random sampling
     """
     results = {}
+
+    # Check if model files are loaded
+    if model is None or not movie_mapping or not reverse_mapping or sparse_matrix is None:
+        for title in movie_titles:
+            results[title] = "AI model not available - please check model files"
+        return results
 
     for title in movie_titles:
         if title not in reverse_mapping:
