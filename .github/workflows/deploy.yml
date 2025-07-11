@@ -129,10 +129,12 @@ jobs:
           DROPLET_PASSWORD="BMI\$46515M"
 
           echo "Deploying application..."
-          sshpass -p "$DROPLET_PASSWORD" ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -p 22 \
+
+          # Step 1: Install Docker and Docker Compose if needed
+          echo "Step 1: Checking Docker installation..."
+          sshpass -p "$DROPLET_PASSWORD" ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ServerAliveInterval=60 -o ServerAliveCountMax=10 -p 22 \
             $DROPLET_USERNAME@$DROPLET_HOST << 'EOF'
 
-          # Check Docker installation
           if ! command -v docker &> /dev/null; then
             echo "Docker not found, installing..."
             apt-get update
@@ -147,6 +149,8 @@ jobs:
             apt-get update
             apt-get install -y docker-ce docker-ce-cli containerd.io
             echo "Docker installed successfully"
+          else
+            echo "Docker is already installed"
           fi
 
           if ! command -v docker-compose &> /dev/null; then
@@ -154,23 +158,59 @@ jobs:
             curl -L "https://github.com/docker/compose/releases/download/v2.20.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
             chmod +x /usr/local/bin/docker-compose
             echo "Docker Compose installed successfully"
+          else
+            echo "Docker Compose is already installed"
           fi
+          EOF
+
+          # Step 2: Load Docker image (with timeout handling)
+          echo "Step 2: Loading Docker image..."
+          sshpass -p "$DROPLET_PASSWORD" ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ServerAliveInterval=60 -o ServerAliveCountMax=20 -p 22 \
+            $DROPLET_USERNAME@$DROPLET_HOST << 'EOF'
 
           cd /opt/opc
-          echo "Loading Docker image..."
-          gunzip -c /opt/opc/django.tar.gz | docker load
+          if [ -f django.tar.gz ]; then
+            echo "Loading Docker image from compressed file..."
+            timeout 600 gunzip -c django.tar.gz | docker load || {
+              echo "Docker load failed or timed out, trying alternative approach..."
+              gunzip django.tar.gz
+              docker load -i django.tar || echo "Alternative load also failed"
+            }
+            echo "Docker image loaded successfully"
+          else
+            echo "Error: django.tar.gz file not found!"
+            exit 1
+          fi
+          EOF
+
+          # Step 3: Deploy the application
+          echo "Step 3: Deploying application..."
+          sshpass -p "$DROPLET_PASSWORD" ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ServerAliveInterval=60 -o ServerAliveCountMax=10 -p 22 \
+            $DROPLET_USERNAME@$DROPLET_HOST << 'EOF'
+
+          cd /opt/opc
+
+          # Stop existing containers
+          echo "Stopping existing containers..."
+          docker-compose -f docker-compose.prod.yml down || true
 
           if [ "${{ github.event.inputs.full_deploy }}" == "true" ]; then
             echo "Performing full deployment..."
-            docker-compose -f /opt/opc/docker-compose.prod.yml down
-            docker-compose -f /opt/opc/docker-compose.prod.yml up -d
+            docker-compose -f docker-compose.prod.yml up -d
           else
             echo "Performing targeted deployment..."
-            docker-compose -f /opt/opc/docker-compose.prod.yml up -d --no-deps web
-            docker-compose -f /opt/opc/docker-compose.prod.yml up -d --no-deps nginx
+            docker-compose -f docker-compose.prod.yml up -d --no-deps web
+            docker-compose -f docker-compose.prod.yml up -d --no-deps nginx
           fi
 
-          rm -f /opt/opc/django.tar.gz
+          # Clean up
+          rm -f django.tar django.tar.gz
+
+          # Check deployment status
+          echo "Checking deployment status..."
+          sleep 5
+          docker-compose -f docker-compose.prod.yml ps
+
           echo "Deployment complete!"
           EOF
 
